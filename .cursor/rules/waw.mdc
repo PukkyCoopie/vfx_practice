@@ -1,0 +1,11 @@
+---
+description: waw means the Words and Wizards game project; this repo is the VFX lab
+alwaysApply: true
+---
+
+# waw vs this repo
+
+- **waw** = the game `Words & Wizards` at `C:\Users\2020\Documents\GodotProjects\words_and_wizards`.
+- This repository (`waw_vfx` / `vfx_practice`) is a standalone VFX practice lab and web portfolio. Do not treat it as the game repo.
+- Copy player/VFX assets from waw when asked. Do not copy combat scripts unless the user requests them.
+- All on-screen UI copy in this repo must stay English.

@@ -1,0 +1,23 @@
+# Godot
+godot/.godot/
+godot/android/
+*.translation
+*.uid
+
+# Web
+web/node_modules/
+web/dist/
+web/public/godot/*
+!web/public/godot/.gitkeep
+
+# OS / editor
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.tmp
+
+# Local scratch
+tmp/
+__pycache__/
+.vscode/
+.idea/
