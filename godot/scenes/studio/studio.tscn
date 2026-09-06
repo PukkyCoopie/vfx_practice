@@ -10,14 +10,14 @@ background_mode = 1
 background_color = Color(0.145, 0.149, 0.157, 1)
 ambient_light_source = 2
 ambient_light_color = Color(0.42, 0.43, 0.46, 1)
-ambient_light_energy = 0.55
+ambient_light_energy = 0.42
 tonemap_mode = 2
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_floor"]
 render_priority = 0
 shader = ExtResource("2_shader")
-shader_parameter/color1 = Color(0.15, 0.15, 0.15, 1)
-shader_parameter/color2 = Color(0.104, 0.104, 0.104, 1)
+shader_parameter/color1 = Color(0.146, 0.146, 0.146, 1)
+shader_parameter/color2 = Color(0.116, 0.116, 0.116, 1)
 shader_parameter/col = 20.0
 shader_parameter/row = 20.0
 
@@ -33,22 +33,23 @@ environment = SubResource("Environment_studio")
 [node name="KeyLight" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.813798, -0.440969, 0.378886, 0, 0.651558, 0.7586, -0.581158, -0.617347, 0.530236, 4, 8, 5)
 light_color = Color(1, 0.97, 0.92, 1)
-light_energy = 1.15
+light_energy = 0.92
 shadow_enabled = true
 
 [node name="FillLight" type="DirectionalLight3D" parent="."]
 transform = Transform3D(-0.766044, -0.321394, -0.55667, 0, 0.866025, -0.5, 0.642788, -0.383022, -0.663414, -5, 4, -3)
 light_color = Color(0.72, 0.80, 0.90, 1)
-light_energy = 0.38
+light_energy = 0.28
 
 [node name="RimLight" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.258819, 0.482963, -0.836516, 0, 0.866025, 0.5, 0.965926, -0.12941, 0.224144, -2, 6, -6)
 light_color = Color(0.82, 0.90, 1, 1)
-light_energy = 0.52
+light_energy = 0.38
 
 [node name="Floor" type="MeshInstance3D" parent="."]
 material_override = SubResource("ShaderMaterial_floor")
 mesh = SubResource("PlaneMesh_floor")
+groups = ["toon_no_outline"]
 
 [node name="CameraRig" type="Node3D" parent="."]
 script = ExtResource("3_orbit")

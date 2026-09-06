@@ -31,7 +31,9 @@ Open `godot/project.godot` in Godot 4.7.1. The main scene is a gray checkerboard
 
 ## Add an effect
 
-1. Create a scene under `godot/scenes/effects/` (no camera or environment; the studio already has those).
+Each effect is its own scene. The studio never morphs one shared scene — clicking a thumbnail instances that effect under `VfxAnchor`.
+
+1. Create a new `.tscn` under `godot/scenes/effects/` (no camera, lights, or environment; the studio already has those).
 2. Append an entry to `godot/data/effects.json`:
 
 ```json

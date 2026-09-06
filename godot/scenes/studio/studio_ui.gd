@@ -30,11 +30,11 @@ func _build() -> void:
 	root.add_child(vignette)
 
 	var margin := MarginContainer.new()
-	margin.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
-	margin.offset_top = -92.0
+	margin.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	margin.offset_bottom = 92.0
 	margin.add_theme_constant_override("margin_left", 24)
 	margin.add_theme_constant_override("margin_right", 24)
-	margin.add_theme_constant_override("margin_bottom", 18)
+	margin.add_theme_constant_override("margin_top", 18)
 	margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(margin)
 

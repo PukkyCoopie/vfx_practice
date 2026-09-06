@@ -2,9 +2,12 @@ extends Node3D
 
 @export var animation_name: StringName = &"standing_idle"
 @export var spelling_library: AnimationLibrary
+@export var apply_toon: bool = true
 
 
 func _ready() -> void:
+	if apply_toon:
+		call_deferred("_apply_toon")
 	var player := _find_animation_player(self)
 	if player == null:
 		push_warning("Player preview: AnimationPlayer not found")
@@ -19,6 +22,10 @@ func _ready() -> void:
 	if anim != null:
 		anim.loop_mode = Animation.LOOP_LINEAR
 	player.play(clip)
+
+
+func _apply_toon() -> void:
+	ToonStyle.apply_unit(self, true)
 
 
 func _find_animation_player(root: Node) -> AnimationPlayer:

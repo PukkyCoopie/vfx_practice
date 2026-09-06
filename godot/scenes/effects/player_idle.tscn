@@ -5,6 +5,7 @@
 [ext_resource type="AnimationLibrary" path="res://assets/animations/player_spelling.tres" id="3_spelling"]
 
 [node name="PlayerIdle" type="Node3D"]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0.2, 0, 1.65)
 script = ExtResource("1_preview")
 animation_name = &"standing_idle"
 spelling_library = ExtResource("3_spelling")

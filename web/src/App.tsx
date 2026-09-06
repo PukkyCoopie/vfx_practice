@@ -14,6 +14,7 @@ export function App() {
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [galleryOpen, setGalleryOpen] = useState(true);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -64,16 +65,6 @@ export function App() {
 
   return (
     <div className="app">
-      <header className="top">
-        <div>
-          <p className="eyebrow">Portfolio Lab</p>
-          <h1>VFX Practice</h1>
-        </div>
-        <p className="hint">Left drag orbit · Right drag pan · Scroll zoom</p>
-      </header>
-
-      <ThumbnailBar activeId={activeId} onSelect={selectEffect} />
-
       <section className="stage" aria-label="Godot viewport">
         <canvas ref={canvasRef} id="godot-canvas" tabIndex={0} />
         {!ready && (
@@ -87,6 +78,20 @@ export function App() {
           </div>
         )}
       </section>
+
+      <aside className={galleryOpen ? "dock is-open" : "dock"}>
+        <button
+          type="button"
+          className="dock-toggle"
+          onClick={() => setGalleryOpen((open) => !open)}
+          aria-expanded={galleryOpen}
+        >
+          {galleryOpen ? "Hide Gallery" : "Show Gallery"}
+        </button>
+        <div className="dock-panel">
+          <ThumbnailBar activeId={activeId} onSelect={selectEffect} />
+        </div>
+      </aside>
     </div>
   );
 }

@@ -1,8 +1,8 @@
 shader_type spatial;
 render_mode cull_back, diffuse_lambert, specular_disabled;
 
-uniform vec4 color1 : source_color = vec4(0.150, 0.150, 0.150, 1.0);
-uniform vec4 color2 : source_color = vec4(0.104, 0.104, 0.104, 1.0);
+uniform vec4 color1 : source_color = vec4(0.146, 0.146, 0.146, 1.0);
+uniform vec4 color2 : source_color = vec4(0.116, 0.116, 0.116, 1.0);
 uniform float col = 20.0;
 uniform float row = 20.0;
 

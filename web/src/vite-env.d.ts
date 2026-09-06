@@ -18,12 +18,17 @@ interface EngineConfig {
   fileSizes?: Record<string, number>;
   focusCanvas?: boolean;
   gdextensionLibs?: string[];
+  mainPack?: string;
   serviceWorker?: boolean | string;
 }
 
 declare class Engine {
   constructor(config: EngineConfig);
-  startGame(opts?: { onProgress?: (current: number, total: number) => void }): Promise<void>;
+  startGame(opts?: {
+    executable?: string;
+    mainPack?: string;
+    onProgress?: (current: number, total: number) => void;
+  }): Promise<void>;
 }
 
 interface Window {

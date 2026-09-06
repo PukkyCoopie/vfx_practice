@@ -46,11 +46,11 @@ export async function loadGodotEngine(
   canvas: HTMLCanvasElement,
   onProgress?: (ratio: number) => void,
 ): Promise<Engine> {
-  const basePath = `${import.meta.env.BASE_URL}godot`.replace(/\/{2,}/g, "/");
-  const executable = "index";
-  const scriptUrl = `${basePath}/${executable}.js`;
-  const wasmUrl = `${basePath}/${executable}.wasm`;
-  const pckUrl = `${basePath}/${executable}.pck`;
+  const godotDir = new URL(`${import.meta.env.BASE_URL}godot/`, document.baseURI);
+  const executable = new URL("index", godotDir).href;
+  const scriptUrl = `${executable}.js`;
+  const wasmUrl = `${executable}.wasm`;
+  const pckUrl = `${executable}.pck`;
 
   const probe = await fetch(scriptUrl, { method: "HEAD" });
   if (!probe.ok) {
@@ -69,10 +69,11 @@ export async function loadGodotEngine(
     canvasResizePolicy: 2,
     ensureCrossOriginIsolationHeaders: false,
     executable,
+    mainPack: pckUrl,
     experimentalVK: false,
     fileSizes: {
-      [`${executable}.pck`]: pckSize,
-      [`${executable}.wasm`]: wasmSize,
+      [pckUrl]: pckSize,
+      [wasmUrl]: wasmSize,
     },
     focusCanvas: true,
     gdextensionLibs: [],
@@ -80,6 +81,8 @@ export async function loadGodotEngine(
   });
 
   await engine.startGame({
+    executable,
+    mainPack: pckUrl,
     onProgress: (current, total) => {
       if (total > 0) {
         onProgress?.(current / total);
