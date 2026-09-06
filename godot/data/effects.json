@@ -1,11 +1,5 @@
 [
   {
-    "id": "studio",
-    "title": "Empty Stage",
-    "scene": "res://scenes/effects/empty_stage.tscn",
-    "thumb": "studio.webp"
-  },
-  {
     "id": "player",
     "title": "Player Idle",
     "scene": "res://scenes/effects/player_idle.tscn",

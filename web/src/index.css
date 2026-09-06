@@ -105,7 +105,8 @@ body,
 
 .thumb-frame {
   display: block;
-  height: 96px;
+  width: 100%;
+  aspect-ratio: 16 / 9;
   border-radius: 8px;
   overflow: hidden;
   border: 1px solid #333;

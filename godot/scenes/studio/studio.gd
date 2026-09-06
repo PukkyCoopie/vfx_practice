@@ -39,6 +39,10 @@ func restart_effect() -> void:
 func get_animation_player() -> AnimationPlayer:
 	if _instance == null or not is_instance_valid(_instance):
 		return null
+	if _instance.has_method("get_playback_player"):
+		var from_preview: Variant = _instance.call("get_playback_player")
+		if from_preview is AnimationPlayer:
+			return from_preview as AnimationPlayer
 	if _instance is AnimationPlayer:
 		return _instance as AnimationPlayer
 	var found := _instance.find_children("*", "AnimationPlayer", true, false)
@@ -49,14 +53,14 @@ func get_animation_player() -> AnimationPlayer:
 
 func get_playback_length() -> float:
 	var player := get_animation_player()
-	if player == null:
+	if player == null or player.current_animation.is_empty():
 		return 0.0
 	return maxf(player.current_animation_length, 0.0)
 
 
 func get_playback_time() -> float:
 	var player := get_animation_player()
-	if player == null:
+	if player == null or player.current_animation.is_empty():
 		return 0.0
 	return player.current_animation_position
 

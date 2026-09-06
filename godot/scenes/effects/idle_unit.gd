@@ -2,8 +2,7 @@ extends Node3D
 
 const TileSnap := preload("res://scripts/tile_snap.gd")
 
-@export var animation_name: StringName = &"spelling/idle"
-@export var spelling_library: AnimationLibrary
+@export var animation_name: StringName = &"idle"
 @export var apply_toon: bool = true
 
 var _player: AnimationPlayer
@@ -15,13 +14,9 @@ func _ready() -> void:
 		call_deferred("_apply_toon")
 	_player = _find_animation_player(self)
 	if _player == null:
-		push_warning("Player preview: AnimationPlayer not found")
 		return
-	if spelling_library != null and not _player.has_animation_library("spelling"):
-		_player.add_animation_library("spelling", spelling_library)
-	_clip = _resolve_animation(_player, animation_name)
+	_clip = _resolve_idle(_player, animation_name)
 	if _clip == &"":
-		push_warning("Player preview: animation not found: %s" % animation_name)
 		return
 	var anim := _player.get_animation(_clip)
 	if anim != null:
@@ -29,17 +24,11 @@ func _ready() -> void:
 	if not _player.animation_finished.is_connected(_on_animation_finished):
 		_player.animation_finished.connect(_on_animation_finished)
 	_player.play(_clip)
-	call_deferred("_snap_player")
+	call_deferred("_snap_to_tile")
 
 
-func get_playback_player() -> AnimationPlayer:
-	return _player
-
-
-func _snap_player() -> void:
-	var player := get_node_or_null("Player")
-	if player is Node3D:
-		TileSnap.snap(player as Node3D, 2.0)
+func _snap_to_tile() -> void:
+	TileSnap.snap(self, 2.0)
 
 
 func _apply_toon() -> void:
@@ -61,13 +50,15 @@ func _find_animation_player(root: Node) -> AnimationPlayer:
 	return null
 
 
-func _resolve_animation(player: AnimationPlayer, wanted: StringName) -> StringName:
+func _resolve_idle(player: AnimationPlayer, wanted: StringName) -> StringName:
 	var target := String(wanted).to_lower()
-	for n in player.get_animation_list():
+	var names := player.get_animation_list()
+	for n in names:
 		if String(n).to_lower() == target:
 			return StringName(n)
-	var suffix := target.get_file()
-	for n in player.get_animation_list():
-		if String(n).to_lower().ends_with("/" + suffix) or String(n).to_lower() == suffix:
+	for n in names:
+		if "idle" in String(n).to_lower():
 			return StringName(n)
+	if names.size() > 0:
+		return StringName(names[0])
 	return &""

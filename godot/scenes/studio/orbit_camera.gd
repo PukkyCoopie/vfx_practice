@@ -1,6 +1,6 @@
 extends Node3D
 
-@export var target: Vector3 = Vector3.ZERO
+@export var target: Vector3 = Vector3(1.0, 0.0, 0.0)
 @export var distance: float = 8.0
 @export var yaw_degrees: float = 45.0
 @export var pitch_degrees: float = -45.0

@@ -1,13 +1,23 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scenes/effects/player_preview.gd" id="1_preview"]
 [ext_resource type="PackedScene" path="res://assets/models/player_red_robe.glb" id="2_model"]
 [ext_resource type="AnimationLibrary" path="res://assets/animations/player_spelling.tres" id="3_spelling"]
+[ext_resource type="Script" path="res://scenes/effects/idle_unit.gd" id="4_idle"]
+[ext_resource type="PackedScene" path="res://assets/models/scarecrow.glb" id="5_scarecrow"]
 
 [node name="PlayerIdle" type="Node3D"]
-transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0.2, 0, 1.65)
 script = ExtResource("1_preview")
-animation_name = &"standing_idle"
+animation_name = &"spelling/idle"
 spelling_library = ExtResource("3_spelling")
 
-[node name="Model" parent="." instance=ExtResource("2_model")]
+[node name="Player" type="Node3D" parent="."]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 1, 0, 3)
+
+[node name="Model" parent="Player" instance=ExtResource("2_model")]
+
+[node name="Scarecrow" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, -3)
+script = ExtResource("4_idle")
+
+[node name="Model" parent="Scarecrow" instance=ExtResource("5_scarecrow")]

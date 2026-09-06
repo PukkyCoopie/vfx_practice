@@ -4,7 +4,7 @@ import { ThumbnailBar } from "./components/ThumbnailBar";
 import { effects } from "./catalog";
 import { loadGodotEngine, syncCanvasSize, waitForBridge } from "./godot/loadGodot";
 
-const defaultId = effects[0]?.id ?? "studio";
+const defaultId = effects[0]?.id ?? "player";
 
 export function App() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
