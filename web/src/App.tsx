@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState } from "react";
+import { RiMenuFoldLine, RiMenuUnfoldLine } from "@remixicon/react";
 import { ThumbnailBar } from "./components/ThumbnailBar";
 import { effects } from "./catalog";
-import { loadGodotEngine, waitForBridge } from "./godot/loadGodot";
+import { loadGodotEngine, syncCanvasSize, waitForBridge } from "./godot/loadGodot";
 
 const defaultId = effects[0]?.id ?? "studio";
 
 export function App() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const queuedId = useRef<string | null>(null);
-  const started = useRef(false);
   const [activeId, setActiveId] = useState(defaultId);
   const [status, setStatus] = useState("Loading Godot export…");
   const [ready, setReady] = useState(false);
@@ -18,25 +18,38 @@ export function App() {
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas || started.current) {
+    if (!canvas) {
       return;
     }
-    started.current = true;
-    let cancelled = false;
 
+    const parent = canvas.parentElement;
+    const resize = () => syncCanvasSize(canvas);
+    resize();
+    const observer = parent ? new ResizeObserver(resize) : null;
+    observer?.observe(parent ?? canvas);
+    window.addEventListener("resize", resize);
+
+    let cancelled = false;
     loadGodotEngine(canvas, (ratio) => {
       if (!cancelled) {
-        setProgress(ratio);
-        setStatus(`Loading Godot export… ${Math.round(ratio * 100)}%`);
+        const clamped = Math.min(1, Math.max(0, ratio));
+        setProgress(clamped);
+        setStatus(`Loading… ${Math.round(clamped * 100)}%`);
       }
     })
-      .then(() => waitForBridge())
-      .then((bridge) => {
+      .then(async () => {
         if (cancelled) {
           return;
         }
+        setProgress(1);
+        setStatus("Starting…");
+        try {
+          await waitForBridge();
+        } catch {
+          // Engine already started; gallery clicks still work after vfxReady.
+        }
         const next = queuedId.current ?? activeId;
-        bridge.select(next);
+        window.vfxSelect?.(next);
         setActiveId(next);
         setReady(true);
         setStatus("");
@@ -51,47 +64,60 @@ export function App() {
 
     return () => {
       cancelled = true;
+      observer?.disconnect();
+      window.removeEventListener("resize", resize);
     };
   }, []);
 
   function selectEffect(id: string) {
     setActiveId(id);
-    if (window.vfxBridge) {
-      window.vfxBridge.select(id);
+    if (window.vfxSelect) {
+      window.vfxSelect(id);
       return;
     }
     queuedId.current = id;
   }
 
   return (
-    <div className="app">
+    <div className={galleryOpen ? "app is-open" : "app"}>
+      <aside className="sidebar" aria-label="Effect gallery">
+        <div className="sidebar-head">
+          <span className="sidebar-title">Gallery</span>
+          <button
+            type="button"
+            className="icon-btn"
+            onClick={() => setGalleryOpen(false)}
+            aria-label="Hide gallery"
+          >
+            <RiMenuFoldLine size={18} />
+          </button>
+        </div>
+        <ThumbnailBar activeId={activeId} onSelect={selectEffect} />
+      </aside>
+
       <section className="stage" aria-label="Godot viewport">
+        {!galleryOpen && (
+          <button
+            type="button"
+            className="icon-btn sidebar-show"
+            onClick={() => setGalleryOpen(true)}
+            aria-label="Show gallery"
+          >
+            <RiMenuUnfoldLine size={18} />
+          </button>
+        )}
         <canvas ref={canvasRef} id="godot-canvas" tabIndex={0} />
         {!ready && (
           <div className={failed ? "overlay is-error" : "overlay"}>
             <p>{status}</p>
             {!failed && (
               <div className="progress">
-                <span style={{ width: `${Math.round(progress * 100)}%` }} />
+                <span style={{ width: `${Math.round(Math.min(progress, 1) * 100)}%` }} />
               </div>
             )}
           </div>
         )}
       </section>
-
-      <aside className={galleryOpen ? "dock is-open" : "dock"}>
-        <button
-          type="button"
-          className="dock-toggle"
-          onClick={() => setGalleryOpen((open) => !open)}
-          aria-expanded={galleryOpen}
-        >
-          {galleryOpen ? "Hide Gallery" : "Show Gallery"}
-        </button>
-        <div className="dock-panel">
-          <ThumbnailBar activeId={activeId} onSelect={selectEffect} />
-        </div>
-      </aside>
     </div>
   );
 }

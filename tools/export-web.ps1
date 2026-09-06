@@ -22,4 +22,5 @@ if ($null -ne $LASTEXITCODE -and $LASTEXITCODE -ne 0) {
     throw "Godot export failed with exit code $LASTEXITCODE"
 }
 
+& "$PSScriptRoot\compress-godot-web.ps1"
 Write-Host "Exported to $outDir"

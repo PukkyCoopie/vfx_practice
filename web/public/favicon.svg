@@ -1,4 +1,4 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
-  <rect width="124" height="124" x="2" y="2" rx="18" fill="#16181d" stroke="#2de2c4" stroke-width="4"/>
-  <polygon points="64,18 74,50 108,50 80,70 90,104 64,82 38,104 48,70 20,50 54,50" fill="#2de2c4"/>
+  <rect width="124" height="124" x="2" y="2" rx="18" fill="#161616" stroke="#c8c8c8" stroke-width="4"/>
+  <polygon points="64,18 74,50 108,50 80,70 90,104 64,82 38,104 48,70 20,50 54,50" fill="#d0d0d0"/>
 </svg>

@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 
-interface VfxBridge {
+interface VfxBridgeApi {
   select(effectId: string): void;
   pause(): void;
   play(): void;
@@ -20,18 +20,25 @@ interface EngineConfig {
   gdextensionLibs?: string[];
   mainPack?: string;
   serviceWorker?: boolean | string;
+  onProgress?: (current: number, total: number) => void;
+  onPrintError?: (text: string) => void;
 }
 
 declare class Engine {
   constructor(config: EngineConfig);
-  startGame(opts?: {
-    executable?: string;
-    mainPack?: string;
-    onProgress?: (current: number, total: number) => void;
-  }): Promise<void>;
+  init(basePath?: string): Promise<void>;
+  preloadFile(file: string, path?: string): Promise<void>;
+  start(opts?: EngineConfig): Promise<void>;
+  startGame(opts?: EngineConfig): Promise<void>;
 }
 
 interface Window {
   Engine?: typeof Engine;
-  vfxBridge?: VfxBridge;
+  vfxReady?: boolean;
+  vfxSelect?: (effectId: string) => void;
+  vfxPause?: () => void;
+  vfxPlay?: () => void;
+  vfxSetSpeed?: (scale: number) => void;
+  vfxRestart?: () => void;
+  vfxBridge?: VfxBridgeApi;
 }

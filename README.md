@@ -62,6 +62,8 @@ npm run dev
 
 ## Deploy
 
+CI gzips `index.wasm` and `index.pck`; the page decompresses them in the browser. A custom Godot build with modules stripped is not used — rebuild cost is high and official 4.7.1 templates stay compatible.
+
 Pushing `main` exports Godot to Web, builds the React app, and deploys GitHub Pages.
 
 Enable once: repository **Settings → Pages → Source = GitHub Actions**.

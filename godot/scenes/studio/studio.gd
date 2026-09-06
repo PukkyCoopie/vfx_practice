@@ -36,6 +36,38 @@ func restart_effect() -> void:
 	_spawn_current()
 
 
+func get_animation_player() -> AnimationPlayer:
+	if _instance == null or not is_instance_valid(_instance):
+		return null
+	if _instance is AnimationPlayer:
+		return _instance as AnimationPlayer
+	var found := _instance.find_children("*", "AnimationPlayer", true, false)
+	if found.is_empty():
+		return null
+	return found[0] as AnimationPlayer
+
+
+func get_playback_length() -> float:
+	var player := get_animation_player()
+	if player == null:
+		return 0.0
+	return maxf(player.current_animation_length, 0.0)
+
+
+func get_playback_time() -> float:
+	var player := get_animation_player()
+	if player == null:
+		return 0.0
+	return player.current_animation_position
+
+
+func seek_playback(time: float) -> void:
+	var player := get_animation_player()
+	if player == null:
+		return
+	player.seek(time, true)
+
+
 func _spawn_current() -> void:
 	_clear_anchor()
 	var path := VfxBridge.scene_path_for(_current_id)

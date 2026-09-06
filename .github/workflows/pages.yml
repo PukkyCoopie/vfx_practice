@@ -44,6 +44,9 @@ jobs:
           mkdir -p web/public/godot
           godot --headless --path godot --import
           godot --headless --path godot --export-release Web ../web/public/godot/index.html
+          gzip -9 -c web/public/godot/index.wasm > web/public/godot/index.wasm.gz
+          gzip -9 -c web/public/godot/index.pck > web/public/godot/index.pck.gz
+          rm -f web/public/godot/index.wasm web/public/godot/index.pck
 
       - name: Setup Node
         uses: actions/setup-node@v4
