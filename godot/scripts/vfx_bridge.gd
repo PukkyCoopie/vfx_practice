@@ -6,35 +6,11 @@ signal playback_changed(is_paused: bool, time_scale: float)
 var _effects: Array = []
 var _current_id: String = ""
 var _studio: Node = null
-var _cb_select: Variant
-var _cb_pause: Variant
-var _cb_play: Variant
-var _cb_speed: Variant
-var _cb_restart: Variant
 
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_load_catalog()
-	if OS.has_feature("web"):
-		_bind_web()
-
-
-func _bind_web() -> void:
-	_cb_select = JavaScriptBridge.create_callback(_on_js_select)
-	_cb_pause = JavaScriptBridge.create_callback(_on_js_pause)
-	_cb_play = JavaScriptBridge.create_callback(_on_js_play)
-	_cb_speed = JavaScriptBridge.create_callback(_on_js_speed)
-	_cb_restart = JavaScriptBridge.create_callback(_on_js_restart)
-	var window_obj: Variant = JavaScriptBridge.get_interface("window")
-	if window_obj == null:
-		return
-	window_obj.vfxSelect = _cb_select
-	window_obj.vfxPause = _cb_pause
-	window_obj.vfxPlay = _cb_play
-	window_obj.vfxSetSpeed = _cb_speed
-	window_obj.vfxRestart = _cb_restart
-	window_obj.vfxReady = true
 
 
 func register_studio(studio: Node) -> void:
@@ -53,7 +29,7 @@ func get_effects() -> Array:
 func get_default_id() -> String:
 	if _effects.is_empty():
 		return ""
-	return String(_effects[0].get("id", ""))
+	return String(_effects[_effects.size() - 1].get("id", ""))
 
 
 func scene_path_for(effect_id: String) -> String:
@@ -100,26 +76,10 @@ func restart() -> void:
 	playback_changed.emit(false, Engine.time_scale)
 
 
-func _on_js_select(args: Array) -> void:
-	if args.size() > 0:
-		select(str(args[0]))
-
-
-func _on_js_pause(_args: Array) -> void:
-	pause()
-
-
-func _on_js_play(_args: Array) -> void:
-	play()
-
-
-func _on_js_speed(args: Array) -> void:
-	if args.size() > 0:
-		setSpeed(float(args[0]))
-
-
-func _on_js_restart(_args: Array) -> void:
-	restart()
+func thumb_path_for(thumb_name: String) -> String:
+	if thumb_name.is_empty():
+		return ""
+	return "res://ui/thumbs/%s" % thumb_name
 
 
 func _load_catalog() -> void:

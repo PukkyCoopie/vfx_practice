@@ -4,5 +4,11 @@
     "title": "Player Idle",
     "scene": "res://scenes/effects/player_idle.tscn",
     "thumb": "player.webp"
+  },
+  {
+    "id": "flame_breath",
+    "title": "Flame Breath",
+    "scene": "res://scenes/effects/flame_breath.tscn",
+    "thumb": "flame_breath.webp"
   }
 ]

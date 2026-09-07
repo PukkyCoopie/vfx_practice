@@ -4,11 +4,9 @@ godot/android/
 *.translation
 *.uid
 
-# Web
-web/node_modules/
-web/dist/
-web/public/godot/*
-!web/public/godot/.gitkeep
+# Godot HTML5 export output
+web/*
+!web/.gitkeep
 
 # OS / editor
 .DS_Store

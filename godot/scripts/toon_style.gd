@@ -16,6 +16,8 @@ static func apply_tree(root: Node, with_outline: bool = true) -> void:
 		var mesh_instance := node as MeshInstance3D
 		if mesh_instance == null or mesh_instance.mesh == null:
 			continue
+		if _is_vfx_no_toon(mesh_instance):
+			continue
 		var use_outline := with_outline and not mesh_instance.is_in_group("toon_no_outline")
 		apply_mesh_instance(mesh_instance, use_outline)
 
@@ -25,11 +27,15 @@ static func apply_unit(unit: Node, with_outline: bool = true) -> void:
 		var mesh_instance := node as MeshInstance3D
 		if mesh_instance == null or mesh_instance.mesh == null:
 			continue
+		if _is_vfx_no_toon(mesh_instance):
+			continue
 		var use_outline := with_outline and not mesh_instance.is_in_group("toon_no_outline")
 		apply_mesh_instance(mesh_instance, use_outline)
 
 
 static func apply_mesh_instance(mesh_instance: MeshInstance3D, with_outline: bool = true) -> void:
+	if _is_vfx_no_toon(mesh_instance):
+		return
 	if mesh_instance.is_in_group("toon_no_outline"):
 		with_outline = false
 
@@ -95,3 +101,12 @@ static func _is_toon_material(mat: ShaderMaterial) -> bool:
 	if mat.has_meta(&"toon_cel"):
 		return true
 	return mat.shader == TOON_SHADER
+
+
+static func _is_vfx_no_toon(node: Node) -> bool:
+	var current := node
+	while current:
+		if current.is_in_group("vfx_no_toon"):
+			return true
+		current = current.get_parent()
+	return false

@@ -18,7 +18,7 @@ render_priority = 0
 shader = ExtResource("2_shader")
 shader_parameter/color1 = Color(0.146, 0.146, 0.146, 1)
 shader_parameter/color2 = Color(0.116, 0.116, 0.116, 1)
-shader_parameter/tile_size = 2.0
+shader_parameter/tile_size = 1.4
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_floor"]
 size = Vector2(20, 20)

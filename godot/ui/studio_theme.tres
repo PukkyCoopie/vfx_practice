@@ -1,4 +1,6 @@
-[gd_resource type="Theme" load_steps=12 format=3]
+[gd_resource type="Theme" load_steps=16 format=3]
+
+[ext_resource type="FontFile" path="res://ui/fonts/Poppins-Regular.woff2" id="1_poppins"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
 content_margin_left = 14.0
@@ -79,22 +81,6 @@ corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_slider"]
-content_margin_top = 7.0
-content_margin_bottom = 7.0
-bg_color = Color(0.22, 0.22, 0.22, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_slider_fill"]
-bg_color = Color(0.86, 0.86, 0.86, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_popup"]
 content_margin_left = 6.0
 content_margin_top = 6.0
@@ -147,7 +133,81 @@ corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gallery"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0.07, 0.07, 0.07, 0.94)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.24, 0.24, 0.24, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+shadow_color = Color(0, 0, 0, 0.35)
+shadow_size = 8
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_thumb_frame"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0.082, 0.082, 0.082, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.2, 0.2, 0.2, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_thumb_frame_active"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0.082, 0.082, 0.082, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.53, 0.53, 0.53, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_thumb_btn"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0, 0, 0, 0)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_thumb_btn_hover"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(1, 1, 1, 0.04)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
 [resource]
+default_font = ExtResource("1_poppins")
 default_font_size = 13
 Button/colors/font_color = Color(0.9, 0.9, 0.9, 1)
 Button/colors/font_disabled_color = Color(0.5, 0.5, 0.5, 1)
@@ -160,9 +220,6 @@ Button/styles/focus = SubResource("StyleBoxFlat_btn_hover")
 Button/styles/hover = SubResource("StyleBoxFlat_btn_hover")
 Button/styles/normal = SubResource("StyleBoxFlat_btn_normal")
 Button/styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
-HSlider/styles/slider = SubResource("StyleBoxFlat_slider")
-HSlider/styles/grabber_area = SubResource("StyleBoxFlat_slider_fill")
-HSlider/styles/grabber_area_highlight = SubResource("StyleBoxFlat_slider_fill")
 Label/colors/font_color = Color(0.72, 0.72, 0.72, 1)
 PanelContainer/styles/panel = SubResource("StyleBoxFlat_panel")
 SpeedItem/colors/font_color = Color(0.86, 0.86, 0.86, 1)
@@ -175,3 +232,17 @@ SpeedItem/styles/hover = SubResource("StyleBoxFlat_item_hover")
 SpeedItem/styles/normal = SubResource("StyleBoxFlat_item_normal")
 SpeedItem/styles/pressed = SubResource("StyleBoxFlat_item_active")
 SpeedMenu/styles/panel = SubResource("StyleBoxFlat_popup")
+GalleryPanel/styles/panel = SubResource("StyleBoxFlat_gallery")
+GalleryTitle/colors/font_color = Color(0.55, 0.55, 0.55, 1)
+GalleryTitle/font_sizes/font_size = 12
+ThumbCard/styles/disabled = SubResource("StyleBoxFlat_thumb_btn")
+ThumbCard/styles/focus = SubResource("StyleBoxFlat_thumb_btn_hover")
+ThumbCard/styles/hover = SubResource("StyleBoxFlat_thumb_btn_hover")
+ThumbCard/styles/normal = SubResource("StyleBoxFlat_thumb_btn")
+ThumbCard/styles/pressed = SubResource("StyleBoxFlat_thumb_btn_hover")
+ThumbFrame/styles/panel = SubResource("StyleBoxFlat_thumb_frame")
+ThumbFrameActive/styles/panel = SubResource("StyleBoxFlat_thumb_frame_active")
+ThumbTitle/colors/font_color = Color(0.55, 0.55, 0.55, 1)
+ThumbTitle/font_sizes/font_size = 12
+ThumbTitleActive/colors/font_color = Color(0.92, 0.92, 0.92, 1)
+ThumbTitleActive/font_sizes/font_size = 12

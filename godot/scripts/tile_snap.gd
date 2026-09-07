@@ -1,10 +1,15 @@
 extends RefCounted
 
+const CombatLayout := preload("res://scripts/combat_layout.gd")
+
 ## Move a unit so its visible mesh sits on the tile under its origin.
 
 
-static func snap(unit: Node3D, tile_size: float = 1.0) -> void:
-	var size := maxf(tile_size, 0.001)
+static func snap(unit: Node3D, tile_size: float = -1.0) -> void:
+	var size := tile_size
+	if size < 0.0:
+		size = CombatLayout.CELL_SIZE
+	size = maxf(size, 0.001)
 	var visual := _visual_ground(unit)
 	var tile_x := floorf(unit.global_position.x / size) * size + size * 0.5
 	var tile_z := floorf(unit.global_position.z / size) * size + size * 0.5

@@ -1,7 +1,8 @@
 extends Node3D
 
-@export var target: Vector3 = Vector3(1.0, 0.0, 0.0)
+@export var target: Vector3 = Vector3(0.0, 0.0, 0.0)
 @export var distance: float = 8.0
+## Classic studio 3/4 view: player lower-left, enemy upper-right.
 @export var yaw_degrees: float = 45.0
 @export var pitch_degrees: float = -45.0
 @export var min_pitch: float = -80.0
@@ -58,6 +59,16 @@ func _unhandled_input(event: InputEvent) -> void:
 			var up := _camera.global_transform.basis.y
 			target -= (right * motion.relative.x + up * -motion.relative.y) * pan_sensitivity * distance
 			_apply()
+
+
+func set_distance(value: float) -> void:
+	distance = clampf(value, min_distance, max_distance)
+	_apply()
+
+
+func set_target(value: Vector3) -> void:
+	target = value
+	_apply()
 
 
 func reset_view() -> void:

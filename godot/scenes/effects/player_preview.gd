@@ -1,24 +1,25 @@
 extends Node3D
 
-const TileSnap := preload("res://scripts/tile_snap.gd")
+const CombatLayout := preload("res://scripts/combat_layout.gd")
 
-@export var animation_name: StringName = &"spelling/idle"
-@export var spelling_library: AnimationLibrary
+@export var animation_name: StringName = &"spelling_idle"
 @export var apply_toon: bool = true
+@export var apply_combat_layout: bool = true
+@export var studio_camera_distance: float = 0.0
 
 var _player: AnimationPlayer
 var _clip: StringName = &""
 
 
 func _ready() -> void:
+	if apply_combat_layout:
+		CombatLayout.apply_duo(self)
 	if apply_toon:
 		call_deferred("_apply_toon")
 	_player = _find_animation_player(self)
 	if _player == null:
 		push_warning("Player preview: AnimationPlayer not found")
 		return
-	if spelling_library != null and not _player.has_animation_library("spelling"):
-		_player.add_animation_library("spelling", spelling_library)
 	_clip = _resolve_animation(_player, animation_name)
 	if _clip == &"":
 		push_warning("Player preview: animation not found: %s" % animation_name)
@@ -29,21 +30,19 @@ func _ready() -> void:
 	if not _player.animation_finished.is_connected(_on_animation_finished):
 		_player.animation_finished.connect(_on_animation_finished)
 	_player.play(_clip)
-	call_deferred("_snap_player")
 
 
 func get_playback_player() -> AnimationPlayer:
 	return _player
 
 
-func _snap_player() -> void:
-	var player := get_node_or_null("Player")
-	if player is Node3D:
-		TileSnap.snap(player as Node3D, 2.0)
-
-
 func _apply_toon() -> void:
-	ToonStyle.apply_unit(self, true)
+	var player_model := get_node_or_null("Player/Model")
+	if player_model:
+		ToonStyle.apply_unit(player_model, true)
+	var scarecrow_model := get_node_or_null("Scarecrow/Model")
+	if scarecrow_model:
+		ToonStyle.apply_unit(scarecrow_model, true)
 
 
 func _on_animation_finished(anim_name: StringName) -> void:
@@ -63,11 +62,14 @@ func _find_animation_player(root: Node) -> AnimationPlayer:
 
 func _resolve_animation(player: AnimationPlayer, wanted: StringName) -> StringName:
 	var target := String(wanted).to_lower()
+	var snake := target.replace("/", "_")
 	for n in player.get_animation_list():
-		if String(n).to_lower() == target:
+		var current := String(n).to_lower()
+		if current == target or current == snake or current.get_file() == snake:
 			return StringName(n)
 	var suffix := target.get_file()
 	for n in player.get_animation_list():
-		if String(n).to_lower().ends_with("/" + suffix) or String(n).to_lower() == suffix:
+		var current := String(n).to_lower()
+		if current.ends_with("/" + suffix) or current.ends_with("_" + suffix) or current == suffix:
 			return StringName(n)
 	return &""

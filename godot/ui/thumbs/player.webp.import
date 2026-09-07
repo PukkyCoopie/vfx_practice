@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c3nawlmtyji6h"
-path="res://.godot/imported/scarecrow_scarecrow_3d_model_basecolor.png-0a04e011e318207cf0893cb05685f39f.ctex"
+uid="uid://bhxhoifpet4ub"
+path="res://.godot/imported/player.webp-15a7971bd7de2de7c7647c3276ca1982.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/models/scarecrow_scarecrow_3d_model_basecolor.png"
-dest_files=["res://.godot/imported/scarecrow_scarecrow_3d_model_basecolor.png-0a04e011e318207cf0893cb05685f39f.ctex"]
+source_file="res://ui/thumbs/player.webp"
+dest_files=["res://.godot/imported/player.webp-15a7971bd7de2de7c7647c3276ca1982.ctex"]
 
 [params]
 

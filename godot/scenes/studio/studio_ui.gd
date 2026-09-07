@@ -4,7 +4,7 @@ const SPEEDS: Array[float] = [0.25, 0.5, 1.0, 2.0]
 const ICON_SIZE := Vector2(36, 36)
 
 var _play_btn: Button
-var _slider: HSlider
+var _slider: StudioSeekBar
 var _time_label: Label
 var _speed_btn: Button
 var _speed_menu: PanelContainer
@@ -13,6 +13,8 @@ var _bar: PanelContainer
 var _blocker: ColorRect
 var _dragging := false
 var _studio: Node
+var _gallery_holder: MarginContainer
+var _show_gallery_btn: Button
 
 
 func _ready() -> void:
@@ -28,6 +30,8 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:
 	if _dragging:
+		if _slider:
+			_refresh_time_label(_slider.value, _slider.max_value)
 		return
 	_refresh_transport()
 
@@ -53,6 +57,32 @@ func _build() -> void:
 	vignette_mat.shader = preload("res://shaders/vignette.gdshader")
 	vignette.material = vignette_mat
 	root.add_child(vignette)
+
+	_gallery_holder = MarginContainer.new()
+	_gallery_holder.set_anchors_preset(Control.PRESET_LEFT_WIDE)
+	_gallery_holder.offset_left = 16.0
+	_gallery_holder.offset_top = 16.0
+	_gallery_holder.offset_right = 268.0
+	_gallery_holder.offset_bottom = -90.0
+	_gallery_holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(_gallery_holder)
+
+	var gallery = (preload("res://ui/effect_gallery.gd") as GDScript).new()
+	gallery.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	gallery.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	gallery.hide_requested.connect(_hide_gallery)
+	_gallery_holder.add_child(gallery)
+
+	_show_gallery_btn = _icon_button(
+		preload("res://ui/icons/panel_show.svg"), _show_gallery, "Show gallery"
+	)
+	_show_gallery_btn.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	_show_gallery_btn.offset_left = 16.0
+	_show_gallery_btn.offset_top = 16.0
+	_show_gallery_btn.offset_right = 52.0
+	_show_gallery_btn.offset_bottom = 52.0
+	_show_gallery_btn.visible = false
+	root.add_child(_show_gallery_btn)
 
 	var holder := MarginContainer.new()
 	holder.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
@@ -81,24 +111,12 @@ func _build() -> void:
 	row.add_child(_play_btn)
 	row.add_child(_icon_button(preload("res://ui/icons/replay.svg"), _on_restart, "Restart"))
 
-	var slider_slot := Control.new()
-	slider_slot.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	slider_slot.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	slider_slot.custom_minimum_size = Vector2(220, 28)
-	row.add_child(slider_slot)
-
-	_slider = HSlider.new()
-	_slider.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_slider.min_value = 0.0
-	_slider.max_value = 1.0
-	_slider.step = 0.01
+	_slider = StudioSeekBar.new()
+	_slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_slider.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	_slider.add_theme_icon_override("grabber", preload("res://ui/icons/grabber.svg"))
-	_slider.add_theme_icon_override("grabber_highlight", preload("res://ui/icons/grabber.svg"))
-	_slider.add_theme_icon_override("grabber_disabled", preload("res://ui/icons/grabber.svg"))
 	_slider.drag_started.connect(func() -> void: _dragging = true)
 	_slider.drag_ended.connect(_on_seek_ended)
-	slider_slot.add_child(_slider)
+	row.add_child(_slider)
 
 	_time_label = Label.new()
 	_time_label.custom_minimum_size = Vector2(84, 0)
@@ -149,6 +167,23 @@ func _build() -> void:
 		item.pressed.connect(_on_speed_selected.bind(i))
 		items.add_child(item)
 		_speed_items.append(item)
+
+
+func _hide_gallery() -> void:
+	if _gallery_holder:
+		_gallery_holder.visible = false
+	if _show_gallery_btn:
+		_show_gallery_btn.visible = true
+		_show_gallery_btn.grab_focus()
+
+
+func _show_gallery() -> void:
+	if _gallery_holder:
+		_gallery_holder.visible = true
+	if _show_gallery_btn:
+		_show_gallery_btn.visible = false
+	if _play_btn:
+		_play_btn.grab_focus()
 
 
 func _icon_button(texture: Texture2D, handler: Callable, label: String) -> Button:
@@ -264,4 +299,10 @@ func _refresh_transport() -> void:
 	_slider.max_value = maxf(length, 0.001)
 	_slider.set_value_no_signal(clampf(time, 0.0, _slider.max_value))
 	_slider.editable = length > 0.0
+	_refresh_time_label(time, length)
+
+
+func _refresh_time_label(time: float, length: float) -> void:
+	if _time_label == null:
+		return
 	_time_label.text = "%.1f / %.1f" % [time, length]

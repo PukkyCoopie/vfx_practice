@@ -1,15 +1,21 @@
 extends Node3D
 
-const TileSnap := preload("res://scripts/tile_snap.gd")
+const CombatLayout := preload("res://scripts/combat_layout.gd")
 
 @export var animation_name: StringName = &"idle"
 @export var apply_toon: bool = true
+## When false, parent (e.g. player_preview) owns combat layout / scale.
+@export var apply_combat_scale: bool = false
 
 var _player: AnimationPlayer
 var _clip: StringName = &""
 
 
 func _ready() -> void:
+	if apply_combat_scale:
+		var model := get_node_or_null("Model") as Node3D
+		if model != null:
+			model.scale = Vector3.ONE * CombatLayout.UNIT_SCALE
 	if apply_toon:
 		call_deferred("_apply_toon")
 	_player = _find_animation_player(self)
@@ -24,11 +30,6 @@ func _ready() -> void:
 	if not _player.animation_finished.is_connected(_on_animation_finished):
 		_player.animation_finished.connect(_on_animation_finished)
 	_player.play(_clip)
-	call_deferred("_snap_to_tile")
-
-
-func _snap_to_tile() -> void:
-	TileSnap.snap(self, 2.0)
 
 
 func _apply_toon() -> void:

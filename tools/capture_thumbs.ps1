@@ -5,7 +5,7 @@ $godotBin = Find-Godot
 
 $root = Split-Path $PSScriptRoot -Parent
 $project = Join-Path $root "godot"
-$outDir = Join-Path $root "web\public\thumbs"
+$outDir = Join-Path $root "godot\ui\thumbs"
 New-Item -ItemType Directory -Force -Path $outDir | Out-Null
 
 Write-Host "Importing Godot project..."
