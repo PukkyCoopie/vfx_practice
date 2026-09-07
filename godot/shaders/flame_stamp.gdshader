@@ -1,9 +1,15 @@
 shader_type spatial;
-render_mode unshaded, cull_disabled, depth_draw_never, specular_disabled, shadows_disabled, blend_mix;
+render_mode unshaded, cull_disabled, depth_draw_never, specular_disabled, shadows_disabled, blend_premul_alpha;
 
-uniform sampler2D sprite : source_color, filter_linear, repeat_disable;
+uniform sampler2D sprite : filter_linear, repeat_disable;
+
+varying vec2 v_atlas_uv;
 
 void vertex() {
+	float cell = clamp(floor(INSTANCE_CUSTOM.z * 3.999), 0.0, 3.0);
+	vec2 origin = vec2(mod(cell, 2.0), floor(cell * 0.5)) * 0.5;
+	vec2 inset = vec2(0.004);
+	v_atlas_uv = origin + mix(inset, vec2(0.5) - inset, UV);
 	float ca = cos(INSTANCE_CUSTOM.x);
 	float sa = sin(INSTANCE_CUSTOM.x);
 	float pscale = length(MODEL_MATRIX[0].xyz);
@@ -23,7 +29,11 @@ void vertex() {
 }
 
 void fragment() {
-	vec4 s = texture(sprite, UV);
-	ALBEDO = s.rgb * COLOR.rgb;
-	ALPHA = s.a * COLOR.a;
+	vec4 s = texture(sprite, v_atlas_uv);
+	float a = s.a * COLOR.a;
+	if (a < 0.003) {
+		discard;
+	}
+	ALBEDO = s.rgb * COLOR.rgb * COLOR.a;
+	ALPHA = a;
 }

@@ -5,7 +5,7 @@ $godotBin = Find-Godot
 
 $root = Split-Path $PSScriptRoot -Parent
 $project = Join-Path $root "godot"
-$outDir = Join-Path $root "web\public\godot"
+$outDir = Join-Path $root "web"
 $outFile = Join-Path $outDir "index.html"
 
 New-Item -ItemType Directory -Force -Path $outDir | Out-Null
@@ -22,5 +22,7 @@ if ($null -ne $LASTEXITCODE -and $LASTEXITCODE -ne 0) {
     throw "Godot export failed with exit code $LASTEXITCODE"
 }
 
+Copy-Item (Join-Path $PSScriptRoot "gzip_fetch.js") (Join-Path $outDir "gzip_fetch.js") -Force
+New-Item -ItemType File -Force -Path (Join-Path $outDir ".nojekyll") | Out-Null
 & "$PSScriptRoot\compress-godot-web.ps1"
 Write-Host "Exported to $outDir"

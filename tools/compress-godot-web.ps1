@@ -1,6 +1,6 @@
 $ErrorActionPreference = "Stop"
 
-$outDir = Join-Path (Split-Path $PSScriptRoot -Parent) "web\public\godot"
+$outDir = Join-Path (Split-Path $PSScriptRoot -Parent) "web"
 $targets = @("index.wasm", "index.pck")
 
 foreach ($name in $targets) {

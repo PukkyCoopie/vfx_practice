@@ -140,7 +140,7 @@ func _run_capture() -> void:
 		await get_tree().process_frame
 		var wait := 0.7
 		if effect_id == "flame_breath":
-			wait = 2.05
+			wait = 2.4
 		await get_tree().create_timer(wait).timeout
 		var img := get_viewport().get_texture().get_image()
 		if img == null:

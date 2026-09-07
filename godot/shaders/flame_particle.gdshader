@@ -1,15 +1,14 @@
 shader_type spatial;
-render_mode unshaded, cull_disabled, depth_draw_never, specular_disabled, shadows_disabled, blend_mix;
+render_mode unshaded, cull_disabled, depth_draw_never, specular_disabled, shadows_disabled, blend_premul_alpha;
 
 const int BITE_COUNT = 48;
 const float ANG_NOISE = 0.42;
-const float SPAWN_MID = 0.36;
-const float SPAWN_SPAN = 0.22;
+const float SPAWN_MID = 0.26;
+const float SPAWN_SPAN = 0.18;
 const float RAD_MIN = 0.20;
 const float RAD_MAX = 0.34;
 const float DISC_RAD = 0.48;
 const float EDGE = 0.006;
-const float SPRITE_SEED = 0.19;
 
 uniform float bite_time = 0.0;
 uniform float bite_speed : hint_range(0.2, 2.5) = 0.55;
@@ -20,11 +19,12 @@ float hash21(vec2 p) {
 }
 
 void fragment() {
-	vec2 uv = UV;
-	float seed = SPRITE_SEED;
+	vec2 cell = clamp(floor(UV * 2.0), vec2(0.0), vec2(1.0));
+	vec2 uv = fract(UV * 2.0);
+	float seed = hash21(cell + vec2(0.19, 3.17));
 	vec2 p = uv - vec2(0.5, 0.5);
 	float body = length(p) - DISC_RAD;
-	float clock = bite_time;
+	float clock = bite_time + hash21(cell + vec2(5.2, 1.1)) * 4.7;
 	float pix_ang = atan(p.y, p.x);
 	float r_max = RAD_MAX * bite_grow;
 	float d_spawn_min = (SPAWN_MID - 0.5 * SPAWN_SPAN) * DISC_RAD;
@@ -77,10 +77,7 @@ void fragment() {
 	}
 
 	float mask = 1.0 - smoothstep(-EDGE, EDGE, body);
-	float heat = 0.97;
-	if (length(p) < 0.18) {
-		heat = 1.0;
-	}
-	ALBEDO = vec3(heat);
+	float heat = 1.0;
+	ALBEDO = vec3(heat) * mask;
 	ALPHA = mask;
 }

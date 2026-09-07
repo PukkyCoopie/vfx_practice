@@ -40,7 +40,9 @@ func _ready() -> void:
 	_quad = QuadMesh.new()
 	_quad.size = Vector2.ONE
 	_flame_mat = _make_sprite_material()
-	_spawn_sprite_preview()
+	_spawn_sprite_viewport()
+	if "--capture" not in OS.get_cmdline_user_args():
+		_spawn_sprite_overlay()
 	_stamp_mat = _make_stamp_material()
 	_stream = _make_stream()
 	add_child(_stream)
@@ -122,7 +124,7 @@ func _make_stream() -> GPUParticles3D:
 	gpu.explosiveness = 0.0
 	gpu.randomness = 0.68
 	gpu.amount_ratio = 0.0
-	gpu.fixed_fps = 60
+	gpu.fixed_fps = 0
 	gpu.interpolate = true
 	gpu.fract_delta = true
 	gpu.local_coords = true
@@ -170,13 +172,7 @@ func _make_process() -> ParticleProcessMaterial:
 	]))
 	pm.scale_min = 0.55
 	pm.scale_max = 1.18
-	pm.scale_curve = _curve_texture(PackedVector2Array([
-		Vector2(0.0, 0.68),
-		Vector2(0.1, 1.0),
-		Vector2(0.42, 1.12),
-		Vector2(0.68, 1.48),
-		Vector2(1.0, 1.85),
-	]))
+	pm.scale_curve = _ease_out_curve(0.82, 1.8, 0.28)
 	pm.color_ramp = _color_ramp(
 		PackedColorArray([
 			Color(1.0, 0.96, 0.38, 1.0),
@@ -219,6 +215,20 @@ func _make_stamp_material() -> ShaderMaterial:
 	return mat
 
 
+func _ease_out_curve(start_v: float, end_v: float, peak_at: float = 1.0) -> CurveTexture:
+	var curve := Curve.new()
+	curve.min_value = 0.0
+	curve.max_value = end_v
+	curve.add_point(Vector2(0.0, start_v), 0.0, 4.2)
+	if peak_at < 0.999:
+		curve.add_point(Vector2(peak_at, end_v), 0.0, 0.0)
+	curve.add_point(Vector2(1.0, end_v), 0.0, 0.0)
+	var tex := CurveTexture.new()
+	tex.width = 256
+	tex.curve = curve
+	return tex
+
+
 func _curve_texture(points: PackedVector2Array) -> CurveTexture:
 	var curve := Curve.new()
 	var ymax := 1.0
@@ -244,7 +254,35 @@ func _color_ramp(colors: PackedColorArray, offsets: PackedFloat32Array) -> Gradi
 	return tex
 
 
-func _spawn_sprite_preview() -> void:
+func _spawn_sprite_viewport() -> void:
+	var vp := SubViewport.new()
+	vp.name = "SpriteViewport"
+	vp.size = Vector2i(1024, 1024)
+	vp.transparent_bg = true
+	vp.handle_input_locally = false
+	vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	vp.own_world_3d = true
+	vp.msaa_3d = Viewport.MSAA_DISABLED
+	_sprite_vp = vp
+	add_child(vp)
+
+	var cam := Camera3D.new()
+	cam.projection = Camera3D.PROJECTION_ORTHOGONAL
+	cam.size = 1.0
+	cam.position = Vector3(0.0, 0.0, 2.0)
+	cam.current = true
+	vp.add_child(cam)
+
+	var sprite := MeshInstance3D.new()
+	var quad := QuadMesh.new()
+	quad.size = Vector2.ONE
+	sprite.mesh = quad
+	sprite.material_override = _flame_mat
+	sprite.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	vp.add_child(sprite)
+
+
+func _spawn_sprite_overlay() -> void:
 	var layer := CanvasLayer.new()
 	layer.name = "SpritePreview"
 	layer.layer = 12
@@ -280,7 +318,7 @@ func _spawn_sprite_preview() -> void:
 	frame.add_child(stack)
 
 	var title := Label.new()
-	title.text = "Particle sprite"
+	title.text = "Particle sprites"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	stack.add_child(title)
 
@@ -306,35 +344,13 @@ void fragment() {
 	checker.material = checker_mat
 	stage.add_child(checker)
 
-	var vp := SubViewport.new()
-	vp.size = Vector2i(512, 512)
-	vp.transparent_bg = true
-	vp.handle_input_locally = false
-	vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
-	vp.own_world_3d = true
-	vp.msaa_3d = Viewport.MSAA_DISABLED
-	_sprite_vp = vp
-
-	var cam := Camera3D.new()
-	cam.projection = Camera3D.PROJECTION_ORTHOGONAL
-	cam.size = 1.0
-	cam.position = Vector3(0.0, 0.0, 2.0)
-	cam.current = true
-	vp.add_child(cam)
-
-	var sprite := MeshInstance3D.new()
-	var quad := QuadMesh.new()
-	quad.size = Vector2.ONE
-	sprite.mesh = quad
-	sprite.material_override = _flame_mat
-	sprite.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	vp.add_child(sprite)
-
-	var view := SubViewportContainer.new()
+	var view := TextureRect.new()
 	view.set_anchors_preset(Control.PRESET_FULL_RECT)
-	view.stretch = true
+	view.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	view.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	view.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	view.add_child(vp)
+	if is_instance_valid(_sprite_vp):
+		view.texture = _sprite_vp.get_texture()
 	stage.add_child(view)
 
 
