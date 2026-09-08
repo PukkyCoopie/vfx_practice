@@ -1,6 +1,11 @@
 extends Node3D
 
 const CombatLayout := preload("res://scripts/combat_layout.gd")
+const CAPTURE_FPS := 12
+const CAPTURE_WIDTH := 480
+const CAPTURE_HEIGHT := 270
+const CAPTURE_MAX_SEC := 4.0
+const CAPTURE_MIN_SEC := 1.6
 
 @onready var _anchor: Node3D = $VfxAnchor
 @onready var _camera_rig: Node3D = $CameraRig
@@ -127,30 +132,73 @@ func _clear_anchor() -> void:
 
 func _run_capture() -> void:
 	_ui.visible = false
-	var out_dir := ProjectSettings.globalize_path("res://ui/thumbs")
-	DirAccess.make_dir_recursive_absolute(out_dir)
+	var capture_root := _capture_root()
+	DirAccess.make_dir_recursive_absolute(capture_root)
 	await get_tree().process_frame
 	await get_tree().process_frame
 	for effect in VfxBridge.get_effects():
 		var effect_id := String(effect.get("id", ""))
 		if effect_id.is_empty():
 			continue
-		select_effect(effect_id)
-		await get_tree().process_frame
-		await get_tree().process_frame
-		var wait := 0.7
-		if effect_id == "flame_breath":
-			wait = 2.4
-		await get_tree().create_timer(wait).timeout
+		await _capture_effect(effect_id, capture_root)
+	get_tree().quit()
+
+
+func _capture_root() -> String:
+	var res := ProjectSettings.globalize_path("res://")
+	return res.path_join("..").path_join("tmp").path_join("capture").simplify_path()
+
+
+func _capture_effect(effect_id: String, capture_root: String) -> void:
+	var dest_dir := capture_root.path_join(effect_id)
+	DirAccess.make_dir_recursive_absolute(dest_dir)
+	_clear_pngs(dest_dir)
+	select_effect(effect_id)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	await get_tree().process_frame
+	_apply_effect_camera()
+	var player := get_animation_player()
+	if player != null and not player.current_animation.is_empty():
+		player.seek(0.0, true)
+		player.play(player.current_animation)
+	await get_tree().process_frame
+	var length := get_playback_length()
+	if length <= 0.05:
+		length = CAPTURE_MIN_SEC
+	length = clampf(length, CAPTURE_MIN_SEC, CAPTURE_MAX_SEC)
+	var count := clampi(
+		int(round(length * float(CAPTURE_FPS))),
+		8,
+		int(CAPTURE_MAX_SEC * CAPTURE_FPS)
+	)
+	var dt := 1.0 / float(CAPTURE_FPS)
+	var saved := 0
+	for i in count:
 		var img := get_viewport().get_texture().get_image()
 		if img == null:
-			push_error("Viewport capture failed for %s" % effect_id)
-			continue
-		img.resize(640, 360, Image.INTERPOLATE_LANCZOS)
-		var dest := out_dir.path_join("%s.webp" % effect_id)
-		var err := img.save_webp(dest, true, 0.9)
+			push_error("Viewport capture failed for %s frame %s" % [effect_id, i])
+			break
+		img.resize(CAPTURE_WIDTH, CAPTURE_HEIGHT, Image.INTERPOLATE_LANCZOS)
+		var path := dest_dir.path_join("%04d.png" % i)
+		var err := img.save_png(path)
 		if err != OK:
-			push_error("Failed to save %s (%s)" % [dest, err])
-		else:
-			print("Captured %s -> %s" % [effect_id, dest])
-	get_tree().quit()
+			push_error("Failed to save %s (%s)" % [path, err])
+			break
+		saved += 1
+		if i + 1 < count:
+			await get_tree().create_timer(dt).timeout
+	print("Captured %s frames for %s -> %s" % [saved, effect_id, dest_dir])
+
+
+func _clear_pngs(dest_dir: String) -> void:
+	var dir := DirAccess.open(dest_dir)
+	if dir == null:
+		return
+	dir.list_dir_begin()
+	var name := dir.get_next()
+	while name != "":
+		if not dir.current_is_dir() and name.ends_with(".png"):
+			dir.remove(name)
+		name = dir.get_next()
+	dir.list_dir_end()

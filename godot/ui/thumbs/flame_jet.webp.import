@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c6o3al60df273"
-path="res://.godot/imported/flame_breath.webp-44c51368154000ec5de68578d84b8c34.ctex"
+uid="uid://q61ysx22dgcw"
+path="res://.godot/imported/flame_jet.webp-2d10952affec6d43bbff92abe63a39cb.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://ui/thumbs/flame_breath.webp"
-dest_files=["res://.godot/imported/flame_breath.webp-44c51368154000ec5de68578d84b8c34.ctex"]
+source_file="res://ui/thumbs/flame_jet.webp"
+dest_files=["res://.godot/imported/flame_jet.webp-2d10952affec6d43bbff92abe63a39cb.ctex"]
 
 [params]
 

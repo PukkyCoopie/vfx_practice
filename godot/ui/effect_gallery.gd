@@ -101,15 +101,7 @@ func _make_card(effect: Dictionary) -> Button:
 	frame.clip_contents = true
 	inner.add_child(frame)
 
-	var tex := TextureRect.new()
-	tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
-	tex.set_anchors_preset(Control.PRESET_FULL_RECT)
-	tex.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var thumb_path := VfxBridge.thumb_path_for(String(effect.get("thumb", "")))
-	if not thumb_path.is_empty() and ResourceLoader.exists(thumb_path):
-		tex.texture = load(thumb_path) as Texture2D
-	frame.add_child(tex)
+	frame.add_child(_make_thumb_view(effect))
 
 	var label := Label.new()
 	label.text = title_text
@@ -121,6 +113,80 @@ func _make_card(effect: Dictionary) -> Button:
 	_frames[effect_id] = frame
 	_titles[effect_id] = label
 	return card
+
+
+func _make_thumb_view(effect: Dictionary) -> TextureRect:
+	var frames := _atlas_frames(effect)
+	var fps := float(effect.get("thumb_fps", 12))
+	if frames.size() > 1:
+		var anim := ThumbAnim.new()
+		anim.setup(frames, fps)
+		return anim
+	var tex := TextureRect.new()
+	_style_thumb_rect(tex)
+	if not frames.is_empty():
+		tex.texture = frames[0]
+	return tex
+
+
+func _atlas_frames(effect: Dictionary) -> Array[Texture2D]:
+	var frames: Array[Texture2D] = []
+	var thumb_path := VfxBridge.thumb_path_for(String(effect.get("thumb", "")))
+	if thumb_path.is_empty() or not ResourceLoader.exists(thumb_path):
+		return frames
+	var sheet := load(thumb_path) as Texture2D
+	if sheet == null:
+		return frames
+	var frame_count := maxi(int(effect.get("thumb_frames", 1)), 1)
+	if frame_count <= 1:
+		frames.append(sheet)
+		return frames
+	var cols := maxi(int(effect.get("thumb_columns", 1)), 1)
+	var rows := maxi(int(ceili(float(frame_count) / float(cols))), 1)
+	var fw := float(sheet.get_width()) / float(cols)
+	var fh := float(sheet.get_height()) / float(rows)
+	for i in frame_count:
+		var atlas := AtlasTexture.new()
+		atlas.atlas = sheet
+		atlas.filter_clip = true
+		atlas.region = Rect2((i % cols) * fw, floori(float(i) / float(cols)) * fh, fw, fh)
+		frames.append(atlas)
+	return frames
+
+
+func _style_thumb_rect(tex: TextureRect) -> void:
+	tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	tex.set_anchors_preset(Control.PRESET_FULL_RECT)
+	tex.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+
+class ThumbAnim extends TextureRect:
+	var _frames: Array[Texture2D] = []
+	var _fps := 12.0
+	var _t := 0.0
+
+	func _ready() -> void:
+		expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+		set_anchors_preset(Control.PRESET_FULL_RECT)
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+		process_mode = Node.PROCESS_MODE_ALWAYS
+
+	func setup(frames: Array[Texture2D], fps: float) -> void:
+		_frames = frames
+		_fps = maxf(fps, 1.0)
+		_t = 0.0
+		texture = _frames[0] if not _frames.is_empty() else null
+		set_process(_frames.size() > 1)
+
+	func _process(delta: float) -> void:
+		if _frames.size() < 2:
+			return
+		_t += delta
+		var span := float(_frames.size()) / _fps
+		_t = fmod(_t, span)
+		texture = _frames[int(_t * _fps) % _frames.size()]
 
 
 func _on_card_pressed(effect_id: String) -> void:

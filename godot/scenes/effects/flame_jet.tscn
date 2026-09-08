@@ -4,9 +4,9 @@
 [ext_resource type="PackedScene" path="res://assets/models/player_red_robe.glb" id="2_model"]
 [ext_resource type="Script" path="res://scenes/effects/idle_unit.gd" id="4_idle"]
 [ext_resource type="PackedScene" path="res://assets/models/scarecrow.glb" id="5_scarecrow"]
-[ext_resource type="Script" path="res://scenes/effects/flame_breath.gd" id="6_flame"]
+[ext_resource type="Script" path="res://scenes/effects/flame_jet.gd" id="6_flame"]
 
-[node name="FlameBreath" type="Node3D"]
+[node name="FlameJet" type="Node3D"]
 script = ExtResource("1_preview")
 animation_name = &"standing_2h_magic_attack_03"
 

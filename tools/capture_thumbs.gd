@@ -1,6 +1,6 @@
 extends SceneTree
 ## Launcher note: the live capture path is Studio (-- --capture).
-## Use tools/capture_thumbs.ps1 from the repo root.
+## Use tools/capture_thumbs.ps1 from the repo root to capture gallery GIFs.
 
 
 func _initialize() -> void:

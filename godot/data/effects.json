@@ -3,12 +3,18 @@
     "id": "player",
     "title": "Player Idle",
     "scene": "res://scenes/effects/player_idle.tscn",
-    "thumb": "player.webp"
+    "thumb": "player.webp",
+    "thumb_frames": 48,
+    "thumb_columns": 6,
+    "thumb_fps": 12
   },
   {
-    "id": "flame_breath",
-    "title": "Flame Breath",
-    "scene": "res://scenes/effects/flame_breath.tscn",
-    "thumb": "flame_breath.webp"
+    "id": "flame_jet",
+    "title": "Flame Jet",
+    "scene": "res://scenes/effects/flame_jet.tscn",
+    "thumb": "flame_jet.webp",
+    "thumb_frames": 48,
+    "thumb_columns": 6,
+    "thumb_fps": 12
   }
 ]
