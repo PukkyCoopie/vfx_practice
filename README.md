@@ -13,8 +13,12 @@ https://pukkycoopie.github.io/vfx_practice/
 
 ![Player Idle](docs/gifs/player.gif)
 
-### Flame Jet
+### Fire Flame
 
-![Flame Jet](docs/gifs/flame_jet.gif)
+![Fire Flame](docs/gifs/flame_jet.gif)
+
+### Water Jet
+
+![Water Jet](docs/gifs/water_jet.gif)
 
 <!-- gallery:end -->

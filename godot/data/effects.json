@@ -10,9 +10,18 @@
   },
   {
     "id": "flame_jet",
-    "title": "Flame Jet",
+    "title": "Fire Flame",
     "scene": "res://scenes/effects/flame_jet.tscn",
     "thumb": "flame_jet.webp",
+    "thumb_frames": 48,
+    "thumb_columns": 6,
+    "thumb_fps": 12
+  },
+  {
+    "id": "water_jet",
+    "title": "Water Jet",
+    "scene": "res://scenes/effects/water_jet.tscn",
+    "thumb": "water_jet.webp",
     "thumb_frames": 48,
     "thumb_columns": 6,
     "thumb_fps": 12

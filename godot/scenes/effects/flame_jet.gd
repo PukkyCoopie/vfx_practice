@@ -2,6 +2,7 @@ extends Node3D
 
 const PARTICLE_SHADER: Shader = preload("res://shaders/flame_particle.gdshader")
 const STAMP_SHADER: Shader = preload("res://shaders/flame_stamp.gdshader")
+const SPARK_SHADER: Shader = preload("res://shaders/flame_spark.gdshader")
 
 @export_group("Placement")
 @export var origin_height: float = 0.62
@@ -22,10 +23,13 @@ const STAMP_SHADER: Shader = preload("res://shaders/flame_stamp.gdshader")
 @export var light_color: Color = Color(1.0, 0.48, 0.12)
 
 var _quad: QuadMesh
+var _spark_mesh: ArrayMesh
 var _flame_mat: ShaderMaterial
 var _stamp_mat: ShaderMaterial
+var _spark_mat: ShaderMaterial
 var _sprite_vp: SubViewport
 var _stream: GPUParticles3D
+var _sparks: GPUParticles3D
 var _light: OmniLight3D
 var _anim: AnimationPlayer
 var _flick_seed := 0.0
@@ -44,11 +48,15 @@ func _ready() -> void:
 	if "--capture" not in OS.get_cmdline_user_args():
 		_spawn_sprite_overlay()
 	_stamp_mat = _make_stamp_material()
+	_spark_mat = _make_spark_material()
 	_stream = _make_stream()
 	add_child(_stream)
+	_sparks = _make_sparks()
+	add_child(_sparks)
 	_spawn_light()
 	_anim = _find_anim()
 	_apply_emit_weight(0.0, 0.0)
+	_warmup_particle_shaders()
 
 
 func _process(delta: float) -> void:
@@ -66,6 +74,10 @@ func _anim_time() -> float:
 	return _anim.current_animation_position
 
 
+func get_cast_time() -> float:
+	return _anim_time()
+
+
 func _emit_weight(time: float) -> float:
 	if time < emit_start or time > emit_end:
 		return 0.0
@@ -76,10 +88,24 @@ func _emit_weight(time: float) -> float:
 	return 1.0
 
 
+func _warmup_particle_shaders() -> void:
+	# Compatibility compiles the generated particle process shader on first emit.
+	# Turbulence makes that shader large; compile it at spawn, not mid-cast.
+	if is_instance_valid(_sparks):
+		_sparks.emitting = true
+		_sparks.restart()
+	if is_instance_valid(_stream):
+		_stream.emitting = true
+		_stream.restart()
+
+
 func _apply_emit_weight(weight: float, delta: float) -> void:
-	if is_instance_valid(_stream) and not is_equal_approx(weight, _last_emit_weight):
-		_stream.amount_ratio = weight
+	if not is_equal_approx(weight, _last_emit_weight):
 		_last_emit_weight = weight
+		if is_instance_valid(_stream):
+			_stream.amount_ratio = weight
+		if is_instance_valid(_sparks):
+			_sparks.amount_ratio = weight
 	if _light == null or not is_instance_valid(_light):
 		return
 	var on := weight > 0.001
@@ -133,7 +159,7 @@ func _make_stream() -> GPUParticles3D:
 	gpu.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
 	gpu.extra_cull_margin = 4.0
 	gpu.draw_order = GPUParticles3D.DRAW_ORDER_LIFETIME
-	gpu.transform_align = GPUParticles3D.TRANSFORM_ALIGN_DISABLED
+	gpu.transform_align = GPUParticles3D.TRANSFORM_ALIGN_Y_TO_VELOCITY
 	gpu.draw_pass_1 = _quad
 	gpu.material_override = _stamp_mat
 	gpu.process_material = _make_process()
@@ -146,11 +172,12 @@ func _make_process() -> ParticleProcessMaterial:
 	pm.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX
 	pm.emission_box_extents = Vector3(0.34, 0.07, 0.05)
 	pm.direction = Vector3(0.0, 0.04, 1.0)
-	pm.spread = 64.0
+	pm.spread = 50.0
 	pm.flatness = 0.96
-	pm.gravity = Vector3(0.0, 0.75, 0.0)
-	pm.radial_accel_min = 0.05
-	pm.radial_accel_max = 1.35
+	pm.gravity = Vector3(0.0, 1.55, 0.0)
+	pm.radial_accel_min = 0.35
+	pm.radial_accel_max = 2.15
+	pm.particle_flag_align_y = true
 	pm.initial_velocity_min = 6.4
 	pm.initial_velocity_max = 11.2
 	pm.damping_min = 4.8
@@ -172,16 +199,17 @@ func _make_process() -> ParticleProcessMaterial:
 	]))
 	pm.scale_min = 0.55
 	pm.scale_max = 1.18
-	pm.scale_curve = _ease_out_curve(0.82, 1.8, 0.28)
+	pm.scale_curve = _flame_scale_curve()
 	pm.color_ramp = _color_ramp(
 		PackedColorArray([
+			Color(1.0, 0.96, 0.38, 0.0),
 			Color(1.0, 0.96, 0.38, 1.0),
 			Color(1.0, 0.48, 0.06, 1.0),
 			Color(0.55, 0.07, 0.015, 1.0),
-			Color(0.06, 0.045, 0.04, 0.96),
-			Color(0.025, 0.022, 0.02, 0.0),
+			Color(0.1, 0.06, 0.04, 0.92),
+			Color(0.03, 0.025, 0.022, 0.0),
 		]),
-		PackedFloat32Array([0.0, 0.15, 0.38, 0.62, 1.0])
+		PackedFloat32Array([0.0, 0.08, 0.18, 0.42, 0.78, 1.0])
 	)
 	pm.hue_variation_min = -0.07
 	pm.hue_variation_max = 0.08
@@ -215,14 +243,172 @@ func _make_stamp_material() -> ShaderMaterial:
 	return mat
 
 
-func _ease_out_curve(start_v: float, end_v: float, peak_at: float = 1.0) -> CurveTexture:
+func _make_spark_material() -> ShaderMaterial:
+	var mat := ShaderMaterial.new()
+	mat.shader = SPARK_SHADER
+	mat.set_shader_parameter("glow", 4.4)
+	mat.render_priority = 2
+	return mat
+
+
+func _make_spark_cross_mesh(width: float, length: float) -> ArrayMesh:
+	var hw := width * 0.5
+	var hl := length * 0.5
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	_spark_quad_verts(st,
+		Vector3(-hw, -hl, 0.0), Vector3(hw, -hl, 0.0),
+		Vector3(hw, hl, 0.0), Vector3(-hw, hl, 0.0))
+	_spark_quad_verts(st,
+		Vector3(0.0, -hl, -hw), Vector3(0.0, -hl, hw),
+		Vector3(0.0, hl, hw), Vector3(0.0, hl, -hw))
+	st.generate_normals()
+	return st.commit()
+
+
+func _spark_quad_verts(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, d: Vector3) -> void:
+	st.set_uv(Vector2(0.0, 1.0))
+	st.add_vertex(a)
+	st.set_uv(Vector2(1.0, 1.0))
+	st.add_vertex(b)
+	st.set_uv(Vector2(1.0, 0.0))
+	st.add_vertex(c)
+	st.set_uv(Vector2(0.0, 1.0))
+	st.add_vertex(a)
+	st.set_uv(Vector2(1.0, 0.0))
+	st.add_vertex(c)
+	st.set_uv(Vector2(0.0, 0.0))
+	st.add_vertex(d)
+
+
+func _make_sparks() -> GPUParticles3D:
+	_spark_mesh = _make_spark_cross_mesh(0.34, 0.98)
+	var gpu := GPUParticles3D.new()
+	gpu.name = "Sparks"
+	gpu.add_to_group("vfx_no_toon")
+	gpu.amount = 22
+	gpu.lifetime = 1.42
+	gpu.preprocess = 0.12
+	gpu.explosiveness = 0.0
+	gpu.randomness = 0.72
+	gpu.amount_ratio = 0.0
+	gpu.fixed_fps = 0
+	gpu.interpolate = true
+	gpu.fract_delta = true
+	gpu.local_coords = true
+	gpu.visibility_aabb = AABB(Vector3(-4.5, -2.2, -0.6), Vector3(9.0, 4.6, length + 2.2))
+	gpu.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	gpu.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+	gpu.extra_cull_margin = 4.0
+	gpu.draw_order = GPUParticles3D.DRAW_ORDER_VIEW_DEPTH
+	gpu.transform_align = GPUParticles3D.TRANSFORM_ALIGN_Y_TO_VELOCITY
+	gpu.draw_pass_1 = _spark_mesh
+	gpu.material_override = _spark_mat
+	gpu.process_material = _make_spark_process()
+	return gpu
+
+
+func _make_spark_process() -> ParticleProcessMaterial:
+	var pm := ParticleProcessMaterial.new()
+	pm.lifetime_randomness = 0.48
+	pm.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX
+	pm.emission_box_extents = Vector3(0.34, 0.08, 0.05)
+	pm.direction = Vector3(0.0, 0.04, 1.0)
+	pm.spread = 52.0
+	pm.flatness = 0.96
+	pm.gravity = Vector3(0.0, 0.7, 0.0)
+	pm.radial_accel_min = 0.3
+	pm.radial_accel_max = 1.9
+	pm.particle_flag_align_y = true
+	pm.particle_flag_rotate_y = true
+	pm.initial_velocity_min = 6.8
+	pm.initial_velocity_max = 11.0
+	pm.damping_min = 1.5
+	pm.damping_max = 4.4
+	pm.linear_accel_min = -1.8
+	pm.linear_accel_max = -0.3
+	pm.damping_curve = _curve_texture(PackedVector2Array([
+		Vector2(0.0, 0.08),
+		Vector2(0.28, 0.32),
+		Vector2(0.62, 0.58),
+		Vector2(1.0, 0.72),
+	]))
+	pm.velocity_limit_curve = _curve_texture(PackedVector2Array([
+		Vector2(0.0, 14.5),
+		Vector2(0.2, 9.2),
+		Vector2(0.45, 5.6),
+		Vector2(0.72, 3.2),
+		Vector2(1.0, 1.8),
+	]))
+	pm.scale_min = 0.17
+	pm.scale_max = 0.32
+	pm.scale_curve = _curve_texture(PackedVector2Array([
+		Vector2(0.0, 0.7),
+		Vector2(0.1, 1.0),
+		Vector2(0.55, 0.95),
+		Vector2(1.0, 0.42),
+	]))
+	pm.color_ramp = _color_ramp(
+		PackedColorArray([
+			Color(2.1, 1.9, 1.15, 1.0),
+			Color(1.7, 1.05, 0.32, 1.0),
+			Color(1.35, 0.48, 0.08, 1.0),
+			Color(0.95, 0.18, 0.02, 0.0),
+		]),
+		PackedFloat32Array([0.0, 0.32, 0.68, 1.0])
+	)
+	pm.hue_variation_min = -0.03
+	pm.hue_variation_max = 0.04
+	pm.angle_min = 0.0
+	pm.angle_max = 180.0
+	pm.angular_velocity_min = -360.0
+	pm.angular_velocity_max = 360.0
+	pm.anim_offset_min = 0.0
+	pm.anim_offset_max = 1.0
+	pm.turbulence_enabled = true
+	pm.turbulence_noise_strength = 0.85
+	pm.turbulence_noise_scale = 1.8
+	pm.turbulence_noise_speed = Vector3(0.22, 0.7, 0.32)
+	pm.turbulence_noise_speed_random = 0.28
+	pm.turbulence_influence_min = 0.04
+	pm.turbulence_influence_max = 0.12
+	pm.turbulence_initial_displacement_min = 0.0
+	pm.turbulence_initial_displacement_max = 0.03
+	pm.turbulence_influence_over_life = _curve_texture(PackedVector2Array([
+		Vector2(0.0, 0.06),
+		Vector2(0.3, 0.22),
+		Vector2(0.7, 0.32),
+		Vector2(1.0, 0.24),
+	]))
+	return pm
+
+
+func _flame_scale_curve() -> CurveTexture:
 	var curve := Curve.new()
 	curve.min_value = 0.0
-	curve.max_value = end_v
+	curve.max_value = 1.8
+	curve.add_point(Vector2(0.0, 0.5), 0.0, 14.0)
+	curve.add_point(Vector2(0.08, 0.86), 1.6, 3.6)
+	curve.add_point(Vector2(0.28, 1.8), 0.0, 0.0)
+	curve.add_point(Vector2(0.66, 1.8), 0.0, 0.0)
+	curve.add_point(Vector2(1.0, 1.36), 0.0, 0.0)
+	var tex := CurveTexture.new()
+	tex.width = 256
+	tex.curve = curve
+	return tex
+
+
+func _ease_out_curve(start_v: float, peak_v: float, peak_at: float = 1.0, end_v: float = -1.0) -> CurveTexture:
+	var last_v := peak_v if end_v < 0.0 else end_v
+	var curve := Curve.new()
+	curve.min_value = 0.0
+	curve.max_value = maxf(peak_v, last_v)
 	curve.add_point(Vector2(0.0, start_v), 0.0, 4.2)
 	if peak_at < 0.999:
-		curve.add_point(Vector2(peak_at, end_v), 0.0, 0.0)
-	curve.add_point(Vector2(1.0, end_v), 0.0, 0.0)
+		curve.add_point(Vector2(peak_at, peak_v), 0.0, 0.0)
+		if end_v >= 0.0:
+			curve.add_point(Vector2(0.66, peak_v), 0.0, 0.0)
+	curve.add_point(Vector2(1.0, last_v), 0.0, 0.0)
 	var tex := CurveTexture.new()
 	tex.width = 256
 	tex.curve = curve
