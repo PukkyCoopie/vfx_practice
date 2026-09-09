@@ -18,7 +18,7 @@ const SPARK_SHADER: Shader = preload("res://shaders/flame_spark.gdshader")
 @export var emit_end: float = 3.72
 
 @export_group("Light")
-@export var light_energy: float = 2.5
+@export var light_energy: float = 5.0
 @export var light_range: float = 4.2
 @export var light_color: Color = Color(1.0, 0.48, 0.12)
 

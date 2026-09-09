@@ -1,10 +1,11 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scenes/effects/player_preview.gd" id="1_preview"]
 [ext_resource type="PackedScene" path="res://assets/models/player_red_robe.glb" id="2_model"]
 [ext_resource type="Script" path="res://scenes/effects/idle_unit.gd" id="4_idle"]
 [ext_resource type="PackedScene" path="res://assets/models/scarecrow.glb" id="5_scarecrow"]
 [ext_resource type="Script" uid="uid://bk3q8n2wtrjet" path="res://scenes/effects/water_jet.gd" id="6_water"]
+[ext_resource type="Script" path="res://scenes/effects/scarecrow_burn.gd" id="7_burn"]
 
 [node name="WaterJet" type="Node3D"]
 script = ExtResource("1_preview")
@@ -23,3 +24,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2.8)
 script = ExtResource("4_idle")
 
 [node name="Model" parent="Scarecrow" instance=ExtResource("5_scarecrow")]
+
+[node name="HitReact" type="Node" parent="Scarecrow"]
+script = ExtResource("7_burn")

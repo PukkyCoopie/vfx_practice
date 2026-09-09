@@ -1,6 +1,6 @@
 extends Node
 
-## Overlay a fire-hit reaction on the scarecrow idle pose.
+## Overlay a jet-hit reaction on the scarecrow idle pose.
 ## Idle keeps playing; this modifier adds impact / writhe / collapse.
 
 @export_group("Hit Window")
@@ -23,7 +23,7 @@ extends Node
 @export var collapse_sink: float = 0.045
 
 var _mod: BurnMod
-var _flame: Node
+var _cast: Node
 var _clock := 0.0
 
 
@@ -63,12 +63,22 @@ func _attach() -> void:
 	skeleton.add_child(_mod)
 	var stage := host.get_parent()
 	if stage != null:
-		_flame = stage.get_node_or_null("Player/Flame")
+		_cast = _find_cast_source(stage)
+
+
+func _find_cast_source(stage: Node) -> Node:
+	var player := stage.get_node_or_null("Player")
+	if player == null:
+		return null
+	for child in player.get_children():
+		if child.has_method("get_cast_time"):
+			return child
+	return null
 
 
 func _cast_time() -> float:
-	if _flame != null and _flame.has_method("get_cast_time"):
-		return float(_flame.call("get_cast_time"))
+	if _cast != null and _cast.has_method("get_cast_time"):
+		return float(_cast.call("get_cast_time"))
 	return 0.0
 
 
