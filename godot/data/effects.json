@@ -25,5 +25,14 @@
     "thumb_frames": 48,
     "thumb_columns": 6,
     "thumb_fps": 12
+  },
+  {
+    "id": "lightning_jet",
+    "title": "Lightning Jet",
+    "scene": "res://scenes/effects/lightning_jet.tscn",
+    "thumb": "lightning_jet.webp",
+    "thumb_frames": 48,
+    "thumb_columns": 6,
+    "thumb_fps": 12
   }
 ]

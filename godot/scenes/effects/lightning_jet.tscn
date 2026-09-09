@@ -1,0 +1,29 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scenes/effects/player_preview.gd" id="1_preview"]
+[ext_resource type="PackedScene" path="res://assets/models/player_red_robe.glb" id="2_model"]
+[ext_resource type="Script" path="res://scenes/effects/idle_unit.gd" id="4_idle"]
+[ext_resource type="PackedScene" path="res://assets/models/scarecrow.glb" id="5_scarecrow"]
+[ext_resource type="Script" path="res://scenes/effects/lightning_jet.gd" id="6_lightning"]
+[ext_resource type="Script" path="res://scenes/effects/scarecrow_burn.gd" id="7_burn"]
+
+[node name="LightningJet" type="Node3D"]
+script = ExtResource("1_preview")
+animation_name = &"standing_2h_magic_attack_03"
+
+[node name="Player" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[node name="Model" parent="Player" instance=ExtResource("2_model")]
+
+[node name="Lightning" type="Node3D" parent="Player"]
+script = ExtResource("6_lightning")
+
+[node name="Scarecrow" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2.8)
+script = ExtResource("4_idle")
+
+[node name="Model" parent="Scarecrow" instance=ExtResource("5_scarecrow")]
+
+[node name="HitReact" type="Node" parent="Scarecrow"]
+script = ExtResource("7_burn")

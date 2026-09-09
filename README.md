@@ -1,24 +1,23 @@
-# VFX Practice
+# VFX Practice Archive
 
-A Godot VFX lab. Open `godot/project.godot` in Godot 4.7 and pick effects from the in-engine gallery.
+I'm a beginner learning game visual effects. With AI assistance, I'm currently working on some basic effects in Godot for my next game project. This repository serves as an archive for my practice work.
 
-Web export is the Godot HTML5 build (no extra HTML/JS shell).
+[https://pukkycoopie.github.io/vfx_practice/](https://pukkycoopie.github.io/vfx_practice/)  
+PCK file is huge, so it might take a while to load.
 
-https://pukkycoopie.github.io/vfx_practice/
-
-<!-- gallery:start -->
 ## Gallery
 
-### Player Idle
+*Currently updating…*
 
-![Player Idle](docs/gifs/player.gif)
-
-### Fire Flame
-
-![Fire Flame](docs/gifs/flame_jet.gif)
-
-### Water Jet
-
-![Water Jet](docs/gifs/water_jet.gif)
-
-<!-- gallery:end -->
+<table>
+<tr>
+<td><strong>Fire Flame</strong></td>
+<td align="right">2026/09/08</td>
+<td><strong>Water Jet</strong></td>
+<td align="right">2026/09/09</td>
+</tr>
+<tr>
+<td colspan="2" align="center"><img src="docs/gifs/flame_jet.gif" alt="Fire Flame"></td>
+<td colspan="2" align="center"><img src="docs/gifs/water_jet.gif" alt="Water Jet"></td>
+</tr>
+</table>
