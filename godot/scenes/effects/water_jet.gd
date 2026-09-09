@@ -67,6 +67,8 @@ var _quad: QuadMesh
 var _sprite_opt: OptionButton
 var _light: OmniLight3D
 var _flick_seed := 0.0
+var _warming := false
+var _warm_done := false
 
 
 func _ready() -> void:
@@ -75,10 +77,16 @@ func _ready() -> void:
 	position = Vector3(0.0, origin_height, origin_forward)
 	_spawn_body()
 	_anim = _find_anim()
+	if _is_capture():
+		await _warmup_for_capture()
+	else:
+		_warmup_splash()
 	_apply_cast(0.0)
 
 
 func _process(delta: float) -> void:
+	if _warming:
+		return
 	_apply_cast(_anim_time(), delta)
 
 
@@ -106,7 +114,6 @@ func _spawn_body() -> void:
 	if not _is_capture():
 		_spawn_sprite_preview()
 		_spawn_debug_gui()
-	_warmup_splash()
 	_spawn_light()
 
 
@@ -392,13 +399,42 @@ func _spawn_splashes() -> void:
 		_splashes.append(gpu)
 
 
+func ensure_vfx_warm() -> void:
+	while not _warm_done and is_inside_tree():
+		await get_tree().process_frame
+
+
 func _warmup_splash() -> void:
-	# Compatibility compiles the particle process shader on first emit.
+	# Live: compile path is already warm after the first studio play.
 	for gpu in _splashes:
 		if is_instance_valid(gpu):
 			gpu.amount_ratio = 0.0
 			gpu.emitting = true
 			gpu.restart()
+	_warm_done = true
+
+
+func _warmup_for_capture() -> void:
+	# Capture is a cold start. Compile process shaders off-camera, then
+	# restore the live emit-on-cast behavior before recording.
+	_warming = true
+	const hide_layer := 1 << 19
+	for gpu in _splashes:
+		if is_instance_valid(gpu):
+			gpu.layers = hide_layer
+			gpu.amount_ratio = 1.0
+			gpu.emitting = true
+			gpu.restart()
+	await get_tree().create_timer(0.22).timeout
+	await RenderingServer.frame_post_draw
+	for gpu in _splashes:
+		if is_instance_valid(gpu):
+			gpu.layers = 1
+			gpu.amount_ratio = 0.0
+			gpu.emitting = false
+			gpu.restart()
+	_warming = false
+	_warm_done = true
 
 
 func _spawn_emit_viewport() -> void:
@@ -685,7 +721,7 @@ func _apply_cast(time: float, delta: float = 0.0) -> void:
 			_sync_cast(mat, grow, cut, flow_time, settle)
 	var ratio := grow * (1.0 - cut)
 	var spraying := grow > 0.02
-	var nozzle_on := time >= emit_start and time < emit_fade_start + 0.1
+	var nozzle_on := time >= emit_start - 0.1 and time < emit_fade_start + 0.1
 	var nozzle_fade := 0.0
 	if time >= emit_fade_start + 0.1:
 		nozzle_fade = clampf((time - emit_fade_start - 0.1) / 0.12, 0.0, 1.0)

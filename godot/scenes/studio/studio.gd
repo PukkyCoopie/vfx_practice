@@ -140,8 +140,18 @@ func _run_capture() -> void:
 		var effect_id := String(effect.get("id", ""))
 		if effect_id.is_empty():
 			continue
+		if not _capture_filter().is_empty() and effect_id != _capture_filter():
+			continue
 		await _capture_effect(effect_id, capture_root)
 	get_tree().quit()
+
+
+func _capture_filter() -> String:
+	var args := OS.get_cmdline_user_args()
+	var idx := args.find("--capture")
+	if idx >= 0 and idx + 1 < args.size() and not str(args[idx + 1]).begins_with("--"):
+		return str(args[idx + 1])
+	return ""
 
 
 func _capture_root() -> String:
@@ -155,14 +165,16 @@ func _capture_effect(effect_id: String, capture_root: String) -> void:
 	_clear_pngs(dest_dir)
 	select_effect(effect_id)
 	await get_tree().process_frame
+	await _await_vfx_warm()
 	await get_tree().process_frame
-	await get_tree().process_frame
+	await RenderingServer.frame_post_draw
 	_apply_effect_camera()
 	var player := get_animation_player()
 	if player != null and not player.current_animation.is_empty():
 		player.seek(0.0, true)
 		player.play(player.current_animation)
 	await get_tree().process_frame
+	await RenderingServer.frame_post_draw
 	var length := get_playback_length()
 	if length <= 0.05:
 		length = CAPTURE_MIN_SEC
@@ -175,6 +187,7 @@ func _capture_effect(effect_id: String, capture_root: String) -> void:
 	var dt := 1.0 / float(CAPTURE_FPS)
 	var saved := 0
 	for i in count:
+		await RenderingServer.frame_post_draw
 		var img := get_viewport().get_texture().get_image()
 		if img == null:
 			push_error("Viewport capture failed for %s frame %s" % [effect_id, i])
@@ -189,6 +202,18 @@ func _capture_effect(effect_id: String, capture_root: String) -> void:
 		if i + 1 < count:
 			await get_tree().create_timer(dt).timeout
 	print("Captured %s frames for %s -> %s" % [saved, effect_id, dest_dir])
+
+
+func _await_vfx_warm() -> void:
+	if _instance == null or not is_instance_valid(_instance):
+		return
+	if _instance.has_method("ensure_vfx_warm"):
+		await _instance.ensure_vfx_warm()
+		return
+	for node in _instance.find_children("*", "", true, false):
+		if node.has_method("ensure_vfx_warm"):
+			await node.ensure_vfx_warm()
+			return
 
 
 func _clear_pngs(dest_dir: String) -> void:
