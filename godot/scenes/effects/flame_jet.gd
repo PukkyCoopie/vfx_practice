@@ -35,6 +35,8 @@ var _anim: AnimationPlayer
 var _flick_seed := 0.0
 var _bite_time := 0.0
 var _last_emit_weight := -1.0
+var _warming := false
+var _warm_done := false
 
 
 func _ready() -> void:
@@ -56,10 +58,11 @@ func _ready() -> void:
 	_spawn_light()
 	_anim = _find_anim()
 	_apply_emit_weight(0.0, 0.0)
-	_warmup_particle_shaders()
 
 
 func _process(delta: float) -> void:
+	if _warming:
+		return
 	_bite_time = fmod(_bite_time + delta, 256.0)
 	if is_instance_valid(_flame_mat):
 		_flame_mat.set_shader_parameter("bite_time", _bite_time)
@@ -88,24 +91,29 @@ func _emit_weight(time: float) -> float:
 	return 1.0
 
 
-func _warmup_particle_shaders() -> void:
-	# Compatibility compiles the generated particle process shader on first emit.
-	# Turbulence makes that shader large; compile it at spawn, not mid-cast.
-	if is_instance_valid(_sparks):
-		_sparks.emitting = true
-		_sparks.restart()
-	if is_instance_valid(_stream):
-		_stream.emitting = true
-		_stream.restart()
+func ensure_vfx_warm() -> void:
+	if _warm_done:
+		return
+	if _warming:
+		while _warming and is_inside_tree():
+			await get_tree().process_frame
+		return
+	_warming = true
+	await VfxWarmup.warm_nodes(self, [_stream, _sparks])
+	_warming = false
+	_warm_done = true
 
 
 func _apply_emit_weight(weight: float, delta: float) -> void:
 	if not is_equal_approx(weight, _last_emit_weight):
 		_last_emit_weight = weight
+		var on := weight > 0.001
 		if is_instance_valid(_stream):
 			_stream.amount_ratio = weight
+			_stream.emitting = on
 		if is_instance_valid(_sparks):
 			_sparks.amount_ratio = weight
+			_sparks.emitting = on
 	if _light == null or not is_instance_valid(_light):
 		return
 	var on := weight > 0.001

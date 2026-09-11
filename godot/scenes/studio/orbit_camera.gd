@@ -29,6 +29,7 @@ func _ready() -> void:
 	_default_distance = distance
 	_default_yaw = yaw_degrees
 	_default_pitch = pitch_degrees
+	VfxWarmup.apply_camera_mask(_camera)
 	_apply()
 
 

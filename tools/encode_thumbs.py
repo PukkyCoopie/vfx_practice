@@ -10,8 +10,6 @@ from PIL import Image
 
 FPS = 12
 SHEET_COLUMNS = 6
-GALLERY_START = "<!-- gallery:start -->"
-GALLERY_END = "<!-- gallery:end -->"
 STALE_THUMBS = ("flame_breath.webp", "flame_breath.webp.import")
 
 
@@ -72,37 +70,7 @@ def update_effect_meta(effect: dict, frame_count: int, columns: int, fps: int) -
     effect["thumb_fps"] = fps
 
 
-def render_gallery(effects: list[dict], gif_dir: Path, root: Path) -> str:
-    lines = [GALLERY_START, "## Gallery", ""]
-    for effect in effects:
-        effect_id = str(effect.get("id", ""))
-        title = str(effect.get("title", effect_id))
-        gif = gif_dir / f"{effect_id}.gif"
-        if not effect_id or not gif.is_file():
-            continue
-        rel = gif.resolve().relative_to(root).as_posix()
-        lines.append(f"### {title}")
-        lines.append("")
-        lines.append(f"![{title}]({rel})")
-        lines.append("")
-    lines.append(GALLERY_END)
-    return "\n".join(lines)
-
-
-def patch_readme(readme: Path, gallery: str) -> None:
-    text = readme.read_text(encoding="utf-8")
-    if GALLERY_START in text and GALLERY_END in text:
-        start = text.index(GALLERY_START)
-        end = text.index(GALLERY_END) + len(GALLERY_END)
-        text = text[:start] + gallery + text[end:]
-    else:
-        text = text.rstrip() + "\n\n" + gallery + "\n"
-    if not text.endswith("\n"):
-        text += "\n"
-    readme.write_text(text, encoding="utf-8", newline="\n")
-
-
-def encode_all(root: Path, fps: int) -> None:
+def encode_all(root: Path, fps: int, only_id: str = "") -> None:
     capture_root = root / "tmp" / "capture"
     thumbs_dir = root / "godot" / "ui" / "thumbs"
     gif_dir = root / "docs" / "gifs"
@@ -115,6 +83,8 @@ def encode_all(root: Path, fps: int) -> None:
     for effect in effects:
         effect_id = str(effect.get("id", ""))
         if not effect_id:
+            continue
+        if only_id and effect_id != only_id:
             continue
         frames = frame_paths(capture_root / effect_id)
         if not frames:
@@ -147,23 +117,12 @@ def encode_all(root: Path, fps: int) -> None:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Encode gallery GIFs and update README.")
-    parser.add_argument("--readme-only", action="store_true")
+    parser = argparse.ArgumentParser(description="Encode gallery GIFs and sprite sheets.")
     parser.add_argument("--fps", type=int, default=FPS)
+    parser.add_argument("--id", dest="effect_id", default="", help="Encode a single effect id")
     args = parser.parse_args()
 
-    root = repo_root()
-    effects_path = root / "godot" / "data" / "effects.json"
-    gif_dir = root / "docs" / "gifs"
-    gif_dir.mkdir(parents=True, exist_ok=True)
-
-    if not args.readme_only:
-        encode_all(root, args.fps)
-
-    effects = load_effects(effects_path)
-    gallery = render_gallery(effects, gif_dir, root)
-    patch_readme(root / "README.md", gallery)
-    print("updated README gallery")
+    encode_all(repo_root(), args.fps, args.effect_id)
     return 0
 
 

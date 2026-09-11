@@ -25,8 +25,4 @@ if ($null -ne $LASTEXITCODE -and $LASTEXITCODE -ne 0) {
 Copy-Item (Join-Path $PSScriptRoot "gzip_fetch.js") (Join-Path $outDir "gzip_fetch.js") -Force
 New-Item -ItemType File -Force -Path (Join-Path $outDir ".nojekyll") | Out-Null
 & "$PSScriptRoot\compress-godot-web.ps1"
-python (Join-Path $PSScriptRoot "encode_thumbs.py") --readme-only
-if ($null -ne $LASTEXITCODE -and $LASTEXITCODE -ne 0) {
-    throw "README gallery update failed with exit code $LASTEXITCODE"
-}
 Write-Host "Exported to $outDir"

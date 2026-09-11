@@ -236,7 +236,10 @@ def resize_png(path: Path) -> None:
 
 def main() -> None:
     root = Path(__file__).resolve().parents[1] / "godot" / "assets" / "models"
-    slim(root / "player_red_robe.glb", {"spelling_idle", "standing_2h_magic_attack_03"})
+    slim(
+        root / "player_red_robe.glb",
+        {"spelling_idle", "standing_2h_magic_attack_02", "standing_2h_magic_attack_03"},
+    )
     slim(root / "scarecrow.glb", {"idle"}, force_png=True)
     for png in root.glob("*.png"):
         resize_png(png)

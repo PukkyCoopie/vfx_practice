@@ -106,7 +106,7 @@ func seek_playback(time: float) -> void:
 	var player := get_animation_player()
 	if player == null:
 		return
-	player.seek(time, true)
+	player.seek(clampf(time, 0.0, get_playback_length()), true)
 
 
 func _spawn_current() -> void:
@@ -175,10 +175,7 @@ func _capture_effect(effect_id: String, capture_root: String) -> void:
 		player.play(player.current_animation)
 	await get_tree().process_frame
 	await RenderingServer.frame_post_draw
-	var length := get_playback_length()
-	if length <= 0.05:
-		length = CAPTURE_MIN_SEC
-	length = clampf(length, CAPTURE_MIN_SEC, CAPTURE_MAX_SEC)
+	var length := _capture_length()
 	var count := clampi(
 		int(round(length * float(CAPTURE_FPS))),
 		8,
@@ -202,6 +199,38 @@ func _capture_effect(effect_id: String, capture_root: String) -> void:
 		if i + 1 < count:
 			await get_tree().create_timer(dt).timeout
 	print("Captured %s frames for %s -> %s" % [saved, effect_id, dest_dir])
+
+
+func _capture_length() -> float:
+	var anim := get_playback_length()
+	var visual := _visual_end_time()
+	var length := anim
+	if visual > 0.5:
+		var padded := visual + 0.12
+		# Keep a short clip's tail, but don't pad a long idle loop to 4s.
+		if anim > 0.05 and anim <= visual + 0.8:
+			length = maxf(padded, anim)
+		else:
+			length = padded
+	if length <= 0.05:
+		length = CAPTURE_MIN_SEC
+	return clampf(length, CAPTURE_MIN_SEC, CAPTURE_MAX_SEC)
+
+
+func _visual_end_time() -> float:
+	if _instance == null or not is_instance_valid(_instance):
+		return 0.0
+	var best := 0.0
+	var nodes: Array = [_instance]
+	nodes.append_array(_instance.find_children("*", "", true, false))
+	for node in nodes:
+		if node == null:
+			continue
+		for key in ["emit_end", "hit_end"]:
+			var value: Variant = node.get(key)
+			if value is float:
+				best = maxf(best, value as float)
+	return best
 
 
 func _await_vfx_warm() -> void:

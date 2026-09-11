@@ -15,7 +15,7 @@ func _ready() -> void:
 	if apply_combat_layout:
 		CombatLayout.apply_duo(self)
 	if apply_toon:
-		call_deferred("_apply_toon")
+		_apply_toon()
 	_player = _find_animation_player(self)
 	if _player == null:
 		push_warning("Player preview: AnimationPlayer not found")
@@ -29,7 +29,24 @@ func _ready() -> void:
 		anim.loop_mode = Animation.LOOP_LINEAR
 	if not _player.animation_finished.is_connected(_on_animation_finished):
 		_player.animation_finished.connect(_on_animation_finished)
-	_player.play(_clip)
+	_player.seek(0.0, true)
+	_player.stop()
+	call_deferred("_play_after_warm")
+
+
+func ensure_vfx_warm() -> void:
+	for node in find_children("*", "", true, false):
+		if node != self and node.has_method("ensure_vfx_warm"):
+			await node.ensure_vfx_warm()
+	await VfxWarmup.wait_draw(self)
+
+
+func _play_after_warm() -> void:
+	if not is_inside_tree():
+		return
+	await ensure_vfx_warm()
+	if is_instance_valid(_player) and _clip != &"":
+		_player.play(_clip)
 
 
 func get_playback_player() -> AnimationPlayer:

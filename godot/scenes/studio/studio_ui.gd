@@ -2,6 +2,7 @@ extends CanvasLayer
 
 const SPEEDS: Array[float] = [0.25, 0.5, 1.0, 2.0]
 const ICON_SIZE := Vector2(36, 36)
+const SEEK_TAIL := 0.2
 
 var _play_btn: Button
 var _slider: StudioSeekBar
@@ -31,7 +32,8 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	if _dragging:
 		if _slider:
-			_refresh_time_label(_slider.value, _slider.max_value)
+			var length := _playback_length()
+			_refresh_time_label(minf(_slider.value, length), length)
 		return
 	_refresh_transport()
 
@@ -258,7 +260,7 @@ func _on_speed_selected(index: int) -> void:
 func _on_seek_ended(_changed: bool) -> void:
 	_dragging = false
 	if _studio and _studio.has_method("seek_playback"):
-		_studio.seek_playback(_slider.value)
+		_studio.seek_playback(minf(_slider.value, _playback_length()))
 
 
 func _on_playback_changed(is_paused: bool, time_scale: float) -> void:
@@ -290,16 +292,20 @@ func _refresh_transport() -> void:
 		_bar.custom_minimum_size.x = minf(640.0, maxf(360.0, view_w - 40.0))
 	if _studio == null or _slider == null:
 		return
-	var length := 0.0
+	var length := _playback_length()
 	var time := 0.0
-	if _studio.has_method("get_playback_length"):
-		length = _studio.get_playback_length()
 	if _studio.has_method("get_playback_time"):
 		time = _studio.get_playback_time()
-	_slider.max_value = maxf(length, 0.001)
+	_slider.max_value = maxf(length, 0.001) + SEEK_TAIL
 	_slider.set_value_no_signal(clampf(time, 0.0, _slider.max_value))
 	_slider.editable = length > 0.0
-	_refresh_time_label(time, length)
+	_refresh_time_label(minf(time, length), length)
+
+
+func _playback_length() -> float:
+	if _studio != null and _studio.has_method("get_playback_length"):
+		return float(_studio.get_playback_length())
+	return 0.0
 
 
 func _refresh_time_label(time: float, length: float) -> void:

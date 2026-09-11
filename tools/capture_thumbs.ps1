@@ -1,3 +1,7 @@
+param(
+    [string]$Effect = ""
+)
+
 $ErrorActionPreference = "Stop"
 
 . "$PSScriptRoot\find-godot.ps1"
@@ -16,13 +20,22 @@ if ($null -ne $LASTEXITCODE -and $LASTEXITCODE -ne 0) {
 }
 
 Write-Host "Capturing gallery GIF frames..."
-& $godotBin --path $project --rendering-driver opengl3 -- --capture
+$godotArgs = @("--path", $project, "--rendering-driver", "opengl3", "--", "--capture")
+if ($Effect) {
+    $godotArgs += $Effect
+    Write-Host "Filter: $Effect"
+}
+& $godotBin @godotArgs
 if ($null -ne $LASTEXITCODE -and $LASTEXITCODE -ne 0) {
     throw "Godot thumbnail capture failed with exit code $LASTEXITCODE"
 }
 
-Write-Host "Encoding GIFs, gallery sheets, and README..."
-python (Join-Path $PSScriptRoot "encode_thumbs.py")
+Write-Host "Encoding GIFs and gallery sheets..."
+$encodeArgs = @(Join-Path $PSScriptRoot "encode_thumbs.py")
+if ($Effect) {
+    $encodeArgs += @("--id", $Effect)
+}
+python @encodeArgs
 if ($null -ne $LASTEXITCODE -and $LASTEXITCODE -ne 0) {
     throw "GIF encode failed with exit code $LASTEXITCODE"
 }

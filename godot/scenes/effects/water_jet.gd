@@ -77,10 +77,6 @@ func _ready() -> void:
 	position = Vector3(0.0, origin_height, origin_forward)
 	_spawn_body()
 	_anim = _find_anim()
-	if _is_capture():
-		await _warmup_for_capture()
-	else:
-		_warmup_splash()
 	_apply_cast(0.0)
 
 
@@ -400,39 +396,26 @@ func _spawn_splashes() -> void:
 
 
 func ensure_vfx_warm() -> void:
-	while not _warm_done and is_inside_tree():
-		await get_tree().process_frame
-
-
-func _warmup_splash() -> void:
-	# Live: compile path is already warm after the first studio play.
-	for gpu in _splashes:
-		if is_instance_valid(gpu):
-			gpu.amount_ratio = 0.0
-			gpu.emitting = true
-			gpu.restart()
-	_warm_done = true
-
-
-func _warmup_for_capture() -> void:
-	# Capture is a cold start. Compile process shaders off-camera, then
-	# restore the live emit-on-cast behavior before recording.
+	if _warm_done:
+		return
+	if _warming:
+		while _warming and is_inside_tree():
+			await get_tree().process_frame
+		return
 	_warming = true
-	const hide_layer := 1 << 19
+	var items: Array = []
+	for gpu in _splashes:
+		items.append(gpu)
+	if is_instance_valid(_body):
+		items.append(_body)
+	await VfxWarmup.warm_nodes(self, items)
 	for gpu in _splashes:
 		if is_instance_valid(gpu):
-			gpu.layers = hide_layer
-			gpu.amount_ratio = 1.0
-			gpu.emitting = true
-			gpu.restart()
-	await get_tree().create_timer(0.22).timeout
-	await RenderingServer.frame_post_draw
-	for gpu in _splashes:
-		if is_instance_valid(gpu):
-			gpu.layers = 1
+			gpu.layers = VfxWarmup.VISIBLE_LAYER
 			gpu.amount_ratio = 0.0
 			gpu.emitting = false
-			gpu.restart()
+	if is_instance_valid(_body):
+		_body.layers = VfxWarmup.VISIBLE_LAYER
 	_warming = false
 	_warm_done = true
 

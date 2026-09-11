@@ -31,7 +31,7 @@
     "title": "Lightning Jet",
     "scene": "res://scenes/effects/lightning_jet.tscn",
     "thumb": "lightning_jet.webp",
-    "thumb_frames": 48,
+    "thumb_frames": 31,
     "thumb_columns": 6,
     "thumb_fps": 12
   }

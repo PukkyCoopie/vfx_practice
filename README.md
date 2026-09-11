@@ -9,6 +9,12 @@ PCK file is huge, so it might take a while to load.
 
 *Currently updating…*
 
+<!--
+  Hand-authored HTML gallery. Do not convert to Markdown tables (no colspan).
+  Two effects per row: title+date, then GIFs with colspan=2.
+  A third effect starts two new rows; leave the right pair empty until a fourth exists.
+  Capture/export must not rewrite this table.
+-->
 <table>
 <tr>
 <td><strong>Fire Flame</strong></td>
@@ -20,4 +26,20 @@ PCK file is huge, so it might take a while to load.
 <td colspan="2" align="center"><img src="docs/gifs/flame_jet.gif" alt="Fire Flame"></td>
 <td colspan="2" align="center"><img src="docs/gifs/water_jet.gif" alt="Water Jet"></td>
 </tr>
+<tr>
+<td><strong>Lightning Jet</strong></td>
+<td align="right">2026/09/11</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td colspan="2" align="center"><img src="docs/gifs/lightning_jet.gif" alt="Lightning Jet"></td>
+<td colspan="2"></td>
+</tr>
 </table>
+
+## License
+
+**Code, shaders, and VFX** in this repository may be used freely, including in personal and commercial projects. No attribution is required.
+
+**3D models** (under `godot/assets/models/`) are not free to use. They were generated through paid AI generation, and remain my property. Do not copy, redistribute, or use them in your own work without permission.

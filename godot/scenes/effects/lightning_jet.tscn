@@ -5,11 +5,11 @@
 [ext_resource type="Script" path="res://scenes/effects/idle_unit.gd" id="4_idle"]
 [ext_resource type="PackedScene" path="res://assets/models/scarecrow.glb" id="5_scarecrow"]
 [ext_resource type="Script" path="res://scenes/effects/lightning_jet.gd" id="6_lightning"]
-[ext_resource type="Script" path="res://scenes/effects/scarecrow_burn.gd" id="7_burn"]
+[ext_resource type="Script" path="res://scenes/effects/scarecrow_shock.gd" id="7_shock"]
 
 [node name="LightningJet" type="Node3D"]
 script = ExtResource("1_preview")
-animation_name = &"standing_2h_magic_attack_03"
+animation_name = &"standing_2h_magic_attack_02"
 
 [node name="Player" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
@@ -26,4 +26,4 @@ script = ExtResource("4_idle")
 [node name="Model" parent="Scarecrow" instance=ExtResource("5_scarecrow")]
 
 [node name="HitReact" type="Node" parent="Scarecrow"]
-script = ExtResource("7_burn")
+script = ExtResource("7_shock")
