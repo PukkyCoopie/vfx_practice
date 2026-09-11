@@ -18,7 +18,7 @@ PCK file is huge, so it might take a while to load.
 <table>
 <tr>
 <td><strong>Fire Flame</strong></td>
-<td align="right">2026/09/08</td>
+<td align="right">2026/09/07</td>
 <td><strong>Water Jet</strong></td>
 <td align="right">2026/09/09</td>
 </tr>

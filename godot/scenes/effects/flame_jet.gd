@@ -41,7 +41,7 @@ var _warm_done := false
 
 func _ready() -> void:
 	add_to_group("vfx_no_toon")
-	process_mode = Node.PROCESS_MODE_ALWAYS
+	process_mode = Node.PROCESS_MODE_PAUSABLE
 	position = Vector3(0.0, origin_height, origin_forward)
 	_quad = QuadMesh.new()
 	_quad.size = Vector2.ONE

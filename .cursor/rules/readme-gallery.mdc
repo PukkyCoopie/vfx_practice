@@ -13,6 +13,18 @@ Keep the Gallery as a **pure HTML** `<table>`. Never convert it to a Markdown ta
 - Do not put Markdown `![]()` or blank lines inside `<td>`. Use `<img src="...">`.
 - Capture/export scripts must not rewrite this table. Dates are hand-authored.
 
+## Locked completion dates
+
+Do **not** change these unless the user explicitly asks:
+
+| Effect | Date |
+|---|---|
+| Fire Flame | `2026/09/07` |
+| Water Jet | `2026/09/09` |
+| Lightning Jet | `2026/09/11` |
+
+When editing the gallery (adding rows, swapping GIFs, etc.), preserve every existing date cell exactly. Fire Flame in particular must stay `2026/09/07` — never restore `2026/09/08`.
+
 ```html
 <tr>
 <td><strong>Lightning Jet</strong></td>

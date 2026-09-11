@@ -80,7 +80,7 @@ var _warm_done := false
 
 func _ready() -> void:
 	add_to_group("vfx_no_toon")
-	process_mode = Node.PROCESS_MODE_ALWAYS
+	process_mode = Node.PROCESS_MODE_PAUSABLE
 	position = Vector3(0.0, origin_height, origin_forward)
 	if length <= 0.01:
 		# Stop in the scarecrow, not behind it: cell gap minus staff offset.

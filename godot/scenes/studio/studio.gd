@@ -17,6 +17,7 @@ var _instance: Node = null
 
 func _ready() -> void:
 	VfxBridge.register_studio(self)
+	VfxBridge.playback_changed.connect(_on_playback_changed)
 	var args := OS.get_cmdline_user_args()
 	if "--capture" in args:
 		await _run_capture()
@@ -120,6 +121,26 @@ func _spawn_current() -> void:
 		return
 	_instance = packed.instantiate()
 	_anchor.add_child(_instance)
+	_freeze_fx(get_tree().paused)
+
+
+func _freeze_fx(frozen: bool) -> void:
+	if _instance == null or not is_instance_valid(_instance):
+		return
+	var vp_mode := SubViewport.UPDATE_DISABLED if frozen else SubViewport.UPDATE_ALWAYS
+	for node in _instance.find_children("*", "SubViewport", true, false):
+		var vp := node as SubViewport
+		if vp:
+			vp.render_target_update_mode = vp_mode
+	var speed := 0.0 if frozen else 1.0
+	for node in _instance.find_children("*", "GPUParticles3D", true, false):
+		var gpu := node as GPUParticles3D
+		if gpu:
+			gpu.speed_scale = speed
+
+
+func _on_playback_changed(is_paused: bool, _time_scale: float) -> void:
+	_freeze_fx(is_paused)
 
 
 func _clear_anchor() -> void:
