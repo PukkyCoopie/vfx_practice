@@ -33,7 +33,7 @@
     "thumb": "lightning_jet.webp",
     "thumb_frames": 62,
     "thumb_columns": 6,
-    "thumb_fps": 12,
-    "capture_loops": 2
+    "thumb_fps": 24,
+    "capture_fps": 24
   }
 ]

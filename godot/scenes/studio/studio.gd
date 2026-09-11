@@ -197,13 +197,14 @@ func _capture_effect(effect_id: String, capture_root: String) -> void:
 		player.play(player.current_animation)
 	await get_tree().process_frame
 	await RenderingServer.frame_post_draw
+	var fps := _capture_fps_for(effect_id)
 	var length := _capture_length(_capture_loops_for(effect_id))
 	var count := clampi(
-		int(round(length * float(CAPTURE_FPS))),
+		int(round(length * float(fps))),
 		8,
-		int(CAPTURE_MAX_SEC * float(CAPTURE_MAX_LOOPS) * CAPTURE_FPS)
+		int(CAPTURE_MAX_SEC * float(CAPTURE_MAX_LOOPS) * float(fps))
 	)
-	var dt := 1.0 / float(CAPTURE_FPS)
+	var dt := 1.0 / float(fps)
 	var saved := 0
 	for i in count:
 		await RenderingServer.frame_post_draw
@@ -220,7 +221,16 @@ func _capture_effect(effect_id: String, capture_root: String) -> void:
 		saved += 1
 		if i + 1 < count:
 			await get_tree().create_timer(dt).timeout
-	print("Captured %s frames for %s -> %s" % [saved, effect_id, dest_dir])
+	print("Captured %s frames @%sfps for %s -> %s" % [saved, fps, effect_id, dest_dir])
+
+
+func _capture_fps_for(effect_id: String) -> int:
+	for effect in VfxBridge.get_effects():
+		if String(effect.get("id", "")) != effect_id:
+			continue
+		var raw: Variant = effect.get("capture_fps", effect.get("thumb_fps", CAPTURE_FPS))
+		return clampi(int(raw), 8, 60)
+	return CAPTURE_FPS
 
 
 func _capture_loops_for(effect_id: String) -> int:

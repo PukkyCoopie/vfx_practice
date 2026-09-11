@@ -92,14 +92,16 @@ def encode_all(root: Path, fps: int, only_id: str = "") -> None:
             continue
         images = [Image.open(path) for path in frames]
         try:
+            effect_fps = int(effect.get("capture_fps") or effect.get("thumb_fps") or fps)
+            effect_fps = max(8, min(effect_fps, 60))
             columns = min(SHEET_COLUMNS, len(images))
             sheet = build_sheet(images, columns)
             sheet_path = thumbs_dir / f"{effect_id}.webp"
             sheet.save(sheet_path, "WEBP", lossless=True, quality=100, method=6)
-            encode_gif(capture_root / effect_id, gif_dir / f"{effect_id}.gif", fps)
-            update_effect_meta(effect, len(images), columns, fps)
+            encode_gif(capture_root / effect_id, gif_dir / f"{effect_id}.gif", effect_fps)
+            update_effect_meta(effect, len(images), columns, effect_fps)
             encoded += 1
-            print(f"encoded {effect_id}: {len(images)} frames")
+            print(f"encoded {effect_id}: {len(images)} frames @ {effect_fps}fps")
         finally:
             for image in images:
                 image.close()
