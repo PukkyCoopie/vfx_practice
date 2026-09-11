@@ -6,6 +6,7 @@ const CAPTURE_WIDTH := 480
 const CAPTURE_HEIGHT := 270
 const CAPTURE_MAX_SEC := 4.0
 const CAPTURE_MIN_SEC := 1.6
+const CAPTURE_MAX_LOOPS := 3
 
 @onready var _anchor: Node3D = $VfxAnchor
 @onready var _camera_rig: Node3D = $CameraRig
@@ -196,11 +197,11 @@ func _capture_effect(effect_id: String, capture_root: String) -> void:
 		player.play(player.current_animation)
 	await get_tree().process_frame
 	await RenderingServer.frame_post_draw
-	var length := _capture_length()
+	var length := _capture_length(_capture_loops_for(effect_id))
 	var count := clampi(
 		int(round(length * float(CAPTURE_FPS))),
 		8,
-		int(CAPTURE_MAX_SEC * CAPTURE_FPS)
+		int(CAPTURE_MAX_SEC * float(CAPTURE_MAX_LOOPS) * CAPTURE_FPS)
 	)
 	var dt := 1.0 / float(CAPTURE_FPS)
 	var saved := 0
@@ -222,20 +223,30 @@ func _capture_effect(effect_id: String, capture_root: String) -> void:
 	print("Captured %s frames for %s -> %s" % [saved, effect_id, dest_dir])
 
 
-func _capture_length() -> float:
+func _capture_loops_for(effect_id: String) -> int:
+	for effect in VfxBridge.get_effects():
+		if String(effect.get("id", "")) != effect_id:
+			continue
+		return clampi(int(effect.get("capture_loops", 1)), 1, CAPTURE_MAX_LOOPS)
+	return 1
+
+
+func _capture_length(loops: int = 1) -> float:
 	var anim := get_playback_length()
 	var visual := _visual_end_time()
-	var length := anim
+	var cycle := anim
 	if visual > 0.5:
 		var padded := visual + 0.12
 		# Keep a short clip's tail, but don't pad a long idle loop to 4s.
 		if anim > 0.05 and anim <= visual + 0.8:
-			length = maxf(padded, anim)
+			cycle = maxf(padded, anim)
 		else:
-			length = padded
-	if length <= 0.05:
-		length = CAPTURE_MIN_SEC
-	return clampf(length, CAPTURE_MIN_SEC, CAPTURE_MAX_SEC)
+			cycle = padded
+	if cycle <= 0.05:
+		cycle = CAPTURE_MIN_SEC
+	cycle = clampf(cycle, CAPTURE_MIN_SEC, CAPTURE_MAX_SEC)
+	# Discrete looping casts (e.g. lightning) need multiple cycles to match live studio.
+	return clampf(cycle * float(maxi(loops, 1)), CAPTURE_MIN_SEC, CAPTURE_MAX_SEC * float(CAPTURE_MAX_LOOPS))
 
 
 func _visual_end_time() -> float:
