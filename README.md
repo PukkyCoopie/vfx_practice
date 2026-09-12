@@ -7,8 +7,6 @@ PCK file is huge, so it might take a while to load.
 
 ## Gallery
 
-*Currently updating…*
-
 <!--
   Hand-authored HTML gallery. Do not convert to Markdown tables (no colspan).
   Two effects per row: title+date, then GIFs with colspan=2.
@@ -29,12 +27,12 @@ PCK file is huge, so it might take a while to load.
 <tr>
 <td><strong>Lightning Jet</strong></td>
 <td align="right">2026/09/11</td>
-<td></td>
-<td></td>
+<td><strong>Frost Jet</strong></td>
+<td align="right">2026/09/12</td>
 </tr>
 <tr>
 <td colspan="2" align="center"><img src="docs/gifs/lightning_jet.gif" alt="Lightning Jet"></td>
-<td colspan="2"></td>
+<td colspan="2" align="center"><img src="docs/gifs/frost_jet.gif" alt="Frost Jet"></td>
 </tr>
 </table>
 

@@ -35,5 +35,14 @@
     "thumb_columns": 6,
     "thumb_fps": 24,
     "capture_fps": 24
+  },
+  {
+    "id": "frost_jet",
+    "title": "Frost Jet",
+    "scene": "res://scenes/effects/frost_jet.tscn",
+    "thumb": "frost_jet.webp",
+    "thumb_frames": 48,
+    "thumb_columns": 6,
+    "thumb_fps": 12
   }
 ]

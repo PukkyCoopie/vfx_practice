@@ -45,6 +45,10 @@ func _play_after_warm() -> void:
 	if not is_inside_tree():
 		return
 	await ensure_vfx_warm()
+	# Capture owns the timeline (seek 0 + play). Auto-play here would advance into
+	# the cast window before that seek, leaving mid-flight GPUParticles behind.
+	if "--capture" in OS.get_cmdline_user_args():
+		return
 	if is_instance_valid(_player) and _clip != &"":
 		_player.play(_clip)
 

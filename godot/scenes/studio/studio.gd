@@ -195,6 +195,7 @@ func _capture_effect(effect_id: String, capture_root: String) -> void:
 	if player != null and not player.current_animation.is_empty():
 		player.seek(0.0, true)
 		player.play(player.current_animation)
+	_reset_fx_for_capture()
 	await get_tree().process_frame
 	await RenderingServer.frame_post_draw
 	var fps := _capture_fps_for(effect_id)
@@ -285,6 +286,22 @@ func _await_vfx_warm() -> void:
 		if node.has_method("ensure_vfx_warm"):
 			await node.ensure_vfx_warm()
 			return
+
+
+func _reset_fx_for_capture() -> void:
+	if _instance == null or not is_instance_valid(_instance):
+		return
+	# Drop any particles that may have spawned before the capture seek(0).
+	for node in _instance.find_children("*", "GPUParticles3D", true, false):
+		var gpu := node as GPUParticles3D
+		if gpu == null:
+			continue
+		gpu.emitting = false
+		gpu.restart()
+	for node in _instance.find_children("*", "SubViewport", true, false):
+		var vp := node as SubViewport
+		if vp:
+			vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 
 
 func _clear_pngs(dest_dir: String) -> void:
