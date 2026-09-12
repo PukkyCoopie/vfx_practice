@@ -192,9 +192,10 @@ func _capture_effect(effect_id: String, capture_root: String) -> void:
 	await RenderingServer.frame_post_draw
 	_apply_effect_camera()
 	var player := get_animation_player()
-	if player != null and not player.current_animation.is_empty():
+	var clip := _capture_animation_clip(player)
+	if player != null and not clip.is_empty():
+		player.play(clip)
 		player.seek(0.0, true)
-		player.play(player.current_animation)
 	_reset_fx_for_capture()
 	await get_tree().process_frame
 	await RenderingServer.frame_post_draw
@@ -302,6 +303,18 @@ func _reset_fx_for_capture() -> void:
 		var vp := node as SubViewport
 		if vp:
 			vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+
+
+func _capture_animation_clip(player: AnimationPlayer) -> StringName:
+	if player != null and not player.current_animation.is_empty():
+		return player.current_animation
+	if _instance != null and is_instance_valid(_instance) and _instance.has_method("get_playback_clip"):
+		var clip: Variant = _instance.call("get_playback_clip")
+		if clip is StringName and not (clip as StringName).is_empty():
+			return clip as StringName
+		if clip is String and not str(clip).is_empty():
+			return StringName(str(clip))
+	return &""
 
 
 func _clear_pngs(dest_dir: String) -> void:
