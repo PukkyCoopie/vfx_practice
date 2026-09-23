@@ -44,5 +44,16 @@
     "thumb_frames": 48,
     "thumb_columns": 6,
     "thumb_fps": 12
+  },
+  {
+    "id": "fire_tile",
+    "title": "Fire Tile",
+    "kind": "tile",
+    "scene": "res://scenes/effects/fire_tile.tscn",
+    "thumb": "fire_tile.webp",
+    "thumb_frames": 51,
+    "thumb_columns": 6,
+    "thumb_fps": 24,
+    "capture_fps": 24
   }
 ]

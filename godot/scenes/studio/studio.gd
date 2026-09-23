@@ -8,15 +8,24 @@ const CAPTURE_MAX_SEC := 4.0
 const CAPTURE_MIN_SEC := 1.6
 const CAPTURE_MAX_LOOPS := 3
 
+const BACKDROP_DARK := Color(0.145, 0.149, 0.157, 1.0)
+const BACKDROP_LIGHT := Color(0.93, 0.89, 0.82, 1.0)
+
 @onready var _anchor: Node3D = $VfxAnchor
 @onready var _camera_rig: Node3D = $CameraRig
+@onready var _floor: MeshInstance3D = $Floor
+@onready var _world_env: WorldEnvironment = $WorldEnvironment
 @onready var _ui: CanvasLayer = $UI
 
 var _current_id: String = ""
 var _instance: Node = null
+var _pose_override := false
+var _backdrop_light := false
 
 
 func _ready() -> void:
+	if _world_env != null and _world_env.environment != null:
+		_world_env.environment = _world_env.environment.duplicate()
 	VfxBridge.register_studio(self)
 	VfxBridge.playback_changed.connect(_on_playback_changed)
 	var args := OS.get_cmdline_user_args()
@@ -53,16 +62,74 @@ func restart_effect() -> void:
 func _apply_effect_camera() -> void:
 	if _camera_rig == null:
 		return
-	var dist := 8.0
-	if _instance != null and is_instance_valid(_instance):
-		var hinted: Variant = _instance.get("studio_camera_distance")
-		if hinted is float and (hinted as float) > 0.5:
-			dist = hinted as float
+	var pose := _effect_camera_pose()
+	if bool(pose.get("override", false)):
+		_pose_override = true
+		if _camera_rig.has_method("set_target"):
+			_camera_rig.set_target(pose["target"])
+		if _camera_rig.has_method("set_angles"):
+			_camera_rig.set_angles(float(pose["yaw"]), float(pose["pitch"]))
+		if _camera_rig.has_method("set_distance"):
+			_camera_rig.set_distance(float(pose["distance"]))
+		return
+	if _pose_override and _camera_rig.has_method("reset_view"):
+		_camera_rig.reset_view()
+		_pose_override = false
+	var dist := float(pose.get("distance", 8.0))
 	var focus := _duo_focus_point()
 	if _camera_rig.has_method("set_target"):
 		_camera_rig.set_target(focus)
 	if _camera_rig.has_method("set_distance"):
 		_camera_rig.set_distance(dist)
+
+
+func _effect_camera_pose() -> Dictionary:
+	var pose := {
+		"override": false,
+		"distance": 8.0,
+		"yaw": 0.0,
+		"pitch": -45.0,
+		"target": Vector3.ZERO,
+	}
+	if _instance == null or not is_instance_valid(_instance):
+		return pose
+	var dist: Variant = _instance.get("studio_camera_distance")
+	if dist is float and (dist as float) > 0.5:
+		pose["distance"] = dist
+	var yaw: Variant = _instance.get("studio_camera_yaw")
+	var pitch: Variant = _instance.get("studio_camera_pitch")
+	if yaw is float and pitch is float:
+		pose["override"] = true
+		pose["yaw"] = yaw
+		pose["pitch"] = pitch
+	var target: Variant = _instance.get("studio_camera_target")
+	if target is Vector3:
+		pose["target"] = target
+		pose["override"] = true
+	return pose
+
+
+func _apply_stage_visibility() -> void:
+	var hide := false
+	if _instance != null and is_instance_valid(_instance):
+		var hinted: Variant = _instance.get("studio_hide_stage")
+		if hinted is bool:
+			hide = hinted
+	if _floor != null:
+		_floor.visible = not hide
+	_apply_backdrop()
+
+
+func set_backdrop_light(light: bool) -> void:
+	_backdrop_light = light
+	_apply_backdrop()
+
+
+func _apply_backdrop() -> void:
+	if _world_env == null or _world_env.environment == null:
+		return
+	var use_light := _backdrop_light and VfxBridge.effect_kind() == "tile"
+	_world_env.environment.background_color = BACKDROP_LIGHT if use_light else BACKDROP_DARK
 
 
 func _duo_focus_point() -> Vector3:
@@ -122,6 +189,7 @@ func _spawn_current() -> void:
 		return
 	_instance = packed.instantiate()
 	_anchor.add_child(_instance)
+	_apply_stage_visibility()
 	_freeze_fx(get_tree().paused)
 
 
@@ -132,12 +200,16 @@ func _freeze_fx(frozen: bool) -> void:
 	for node in _instance.find_children("*", "SubViewport", true, false):
 		var vp := node as SubViewport
 		if vp:
-			vp.render_target_update_mode = vp_mode
+			vp.render_target_update_mode = SubViewport.UPDATE_ONCE if not frozen and vp.get_meta("static_render", false) else vp_mode
 	var speed := 0.0 if frozen else 1.0
 	for node in _instance.find_children("*", "GPUParticles3D", true, false):
 		var gpu := node as GPUParticles3D
 		if gpu:
 			gpu.speed_scale = speed
+	for node in _instance.find_children("*", "GPUParticles2D", true, false):
+		var gpu2 := node as GPUParticles2D
+		if gpu2:
+			gpu2.speed_scale = speed
 
 
 func _on_playback_changed(is_paused: bool, _time_scale: float) -> void:
@@ -299,10 +371,17 @@ func _reset_fx_for_capture() -> void:
 			continue
 		gpu.emitting = false
 		gpu.restart()
+	for node in _instance.find_children("*", "GPUParticles2D", true, false):
+		var gpu2 := node as GPUParticles2D
+		if gpu2 == null:
+			continue
+		gpu2.emitting = false
+		gpu2.restart()
+		gpu2.emitting = true
 	for node in _instance.find_children("*", "SubViewport", true, false):
 		var vp := node as SubViewport
 		if vp:
-			vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+			vp.render_target_update_mode = SubViewport.UPDATE_ONCE if vp.get_meta("static_render", false) else SubViewport.UPDATE_ALWAYS
 
 
 func _capture_animation_clip(player: AnimationPlayer) -> StringName:

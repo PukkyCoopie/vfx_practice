@@ -43,6 +43,14 @@ func get_current_id() -> String:
 	return _current_id
 
 
+func effect_kind(effect_id: String = "") -> String:
+	var id := effect_id if not effect_id.is_empty() else _current_id
+	for effect in _effects:
+		if String(effect.get("id", "")) == id:
+			return String(effect.get("kind", ""))
+	return ""
+
+
 func select(effect_id: String) -> void:
 	var path := scene_path_for(effect_id)
 	if path.is_empty():

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ywnsde2obapw"
-path="res://.godot/imported/frost_jet.webp-a5af4a4f527341f855e36840d57c09d5.ctex"
+uid="uid://dlcixw223qh6s"
+path="res://.godot/imported/fire_tile.webp-2dc50138dc20c529defc4b3a96e081ad.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://ui/thumbs/frost_jet.webp"
-dest_files=["res://.godot/imported/frost_jet.webp-a5af4a4f527341f855e36840d57c09d5.ctex"]
+source_file="res://ui/thumbs/fire_tile.webp"
+dest_files=["res://.godot/imported/fire_tile.webp-2dc50138dc20c529defc4b3a96e081ad.ctex"]
 
 [params]
 

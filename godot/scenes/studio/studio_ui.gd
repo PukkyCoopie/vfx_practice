@@ -16,6 +16,9 @@ var _dragging := false
 var _studio: Node
 var _gallery_holder: MarginContainer
 var _show_gallery_btn: Button
+var _vignette: ColorRect
+var _bg_panel: PanelContainer
+var _bg_toggle: CheckButton
 
 
 func _ready() -> void:
@@ -23,8 +26,9 @@ func _ready() -> void:
 	_studio = get_parent()
 	_build()
 	VfxBridge.playback_changed.connect(_on_playback_changed)
-	VfxBridge.effect_changed.connect(func(_id: String) -> void: _refresh_transport())
+	VfxBridge.effect_changed.connect(_on_effect_changed)
 	_on_playback_changed(get_tree().paused, Engine.time_scale)
+	_sync_backdrop_toggle()
 	if _play_btn:
 		_play_btn.grab_focus()
 
@@ -52,13 +56,13 @@ func _build() -> void:
 	root.theme = preload("res://ui/studio_theme.tres")
 	add_child(root)
 
-	var vignette := ColorRect.new()
-	vignette.set_anchors_preset(Control.PRESET_FULL_RECT)
-	vignette.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_vignette = ColorRect.new()
+	_vignette.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_vignette.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var vignette_mat := ShaderMaterial.new()
 	vignette_mat.shader = preload("res://shaders/vignette.gdshader")
-	vignette.material = vignette_mat
-	root.add_child(vignette)
+	_vignette.material = vignette_mat
+	root.add_child(_vignette)
 
 	_gallery_holder = MarginContainer.new()
 	_gallery_holder.set_anchors_preset(Control.PRESET_LEFT_WIDE)
@@ -85,6 +89,23 @@ func _build() -> void:
 	_show_gallery_btn.offset_bottom = 52.0
 	_show_gallery_btn.visible = false
 	root.add_child(_show_gallery_btn)
+
+	_bg_panel = PanelContainer.new()
+	_bg_panel.theme_type_variation = &"GalleryPanel"
+	_bg_panel.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	_bg_panel.offset_left = -210.0
+	_bg_panel.offset_top = 16.0
+	_bg_panel.offset_right = -16.0
+	_bg_panel.offset_bottom = 64.0
+	_bg_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	_bg_panel.visible = false
+	root.add_child(_bg_panel)
+
+	_bg_toggle = CheckButton.new()
+	_bg_toggle.text = "Light background"
+	_bg_toggle.focus_mode = Control.FOCUS_ALL
+	_bg_toggle.toggled.connect(_on_backdrop_toggled)
+	_bg_panel.add_child(_bg_toggle)
 
 	var holder := MarginContainer.new()
 	holder.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
@@ -169,6 +190,27 @@ func _build() -> void:
 		item.pressed.connect(_on_speed_selected.bind(i))
 		items.add_child(item)
 		_speed_items.append(item)
+
+
+func _on_effect_changed(_id: String) -> void:
+	_refresh_transport()
+	_sync_backdrop_toggle()
+
+
+func _sync_backdrop_toggle() -> void:
+	var tile := VfxBridge.effect_kind() == "tile"
+	if _bg_panel:
+		_bg_panel.visible = tile
+	if _vignette:
+		_vignette.visible = not tile
+	if _studio and _studio.has_method("set_backdrop_light"):
+		var light := tile and _bg_toggle != null and _bg_toggle.button_pressed
+		_studio.set_backdrop_light(light)
+
+
+func _on_backdrop_toggled(light: bool) -> void:
+	if _studio and _studio.has_method("set_backdrop_light"):
+		_studio.set_backdrop_light(light)
 
 
 func _hide_gallery() -> void:

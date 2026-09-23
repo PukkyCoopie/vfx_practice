@@ -34,6 +34,8 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if VfxBridge.effect_kind() == "tile":
+		return
 	if event is InputEventMouseButton:
 		var mouse := event as InputEventMouseButton
 		if mouse.button_index == MOUSE_BUTTON_WHEEL_UP and mouse.pressed:
@@ -64,6 +66,12 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func set_distance(value: float) -> void:
 	distance = clampf(value, min_distance, max_distance)
+	_apply()
+
+
+func set_angles(yaw: float, pitch: float) -> void:
+	yaw_degrees = yaw
+	pitch_degrees = clampf(pitch, min_pitch, max_pitch)
 	_apply()
 
 

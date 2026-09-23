@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/effects/fire_tile.gd" id="1_fire"]
+
+[node name="FireTile" type="Node"]
+script = ExtResource("1_fire")
