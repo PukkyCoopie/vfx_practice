@@ -251,6 +251,8 @@ func _layout() -> void:
 	if vp.y < 32.0 or _holder == null:
 		return
 	_side = maxf(24.0, tile_side)
+	if "--capture" in OS.get_cmdline_user_args():
+		_side = vp.y * 0.34
 	_pad = _side * PAD_RATIO
 	var total := _side + _pad * 2.0
 	_holder.custom_minimum_size = Vector2(total, total)
@@ -270,7 +272,7 @@ func _layout() -> void:
 	_letter_viewport.size = Vector2i(roundi(_side), roundi(_side))
 	_letter_label.position = Vector2(TEXT_MARGIN, TEXT_MARGIN)
 	_letter_label.size = Vector2(_letter_viewport.size) - Vector2.ONE * TEXT_MARGIN * 2.0
-	_letter_label.add_theme_font_size_override("font_size", clampi(int(_side * FONT_SIZE_RATIO), FONT_SIZE_MIN, FONT_SIZE_MAX))
+	_letter_label.add_theme_font_size_override("font_size", roundi(clampf(tile_side * FONT_SIZE_RATIO, FONT_SIZE_MIN, FONT_SIZE_MAX) * _side / maxf(tile_side, 24.0)))
 	_letter_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 
 	if _sparks == null:

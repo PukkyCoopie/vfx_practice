@@ -46,8 +46,8 @@ PCK file is huge, so it might take a while to load.
 <td align="right">2026/09/24</td>
 </tr>
 <tr>
-<td colspan="2" align="center"><img src="docs/gifs/fire_tile.gif" alt="Fire Tile with animated flames and glowing embers"><br>Procedural flames, flowing ribbons, and glowing embers.<br>Drag the tile or click empty space to see wind react to movement.</td>
-<td colspan="2" align="center"><img src="docs/gifs/snow_tile.gif" alt="Snow Tile with powder snow and softly drifting cold mist"><br>Sunlit snow crystals, swirling flakes, and softly drifting cold mist.<br>Movement disturbs the mist, which curls and gently settles.</td>
+<td colspan="2" align="center"><img src="docs/gifs/fire_tile.gif" alt="Fire Tile with animated flames and glowing embers"></td>
+<td colspan="2" align="center"><img src="docs/gifs/snow_tile.gif" alt="Snow Tile with powder snow and softly drifting cold mist"></td>
 </tr>
 <tr>
 <td><strong>Water Tile</strong></td>
@@ -56,8 +56,8 @@ PCK file is huge, so it might take a while to load.
 <td align="right">2026/09/24</td>
 </tr>
 <tr>
-<td colspan="2" align="center"><img src="docs/gifs/water_tile.gif" alt="Water Tile with flowing highlights, rising bubbles, and ripples"><br>Flowing water highlights, floating bubbles, and gentle ripples.<br>Drag to slosh the water, shed droplets, and see it bounce back.</td>
-<td colspan="2" align="center"><img src="docs/gifs/lightning_tile.gif" alt="Lightning Tile with violet storm clouds and branching electric arcs"><br>Violet storm clouds and writhing, branching electric arcs.<br>Discharges travel along each bolt; movement leaves short electric trails.</td>
+<td colspan="2" align="center"><img src="docs/gifs/water_tile.gif" alt="Water Tile with flowing highlights, rising bubbles, and ripples"></td>
+<td colspan="2" align="center"><img src="docs/gifs/lightning_tile.gif" alt="Lightning Tile with violet storm clouds and branching electric arcs"></td>
 </tr>
 </table>
 
