@@ -55,5 +55,38 @@
     "thumb_columns": 6,
     "thumb_fps": 24,
     "capture_fps": 24
+  },
+  {
+    "id": "water_tile",
+    "title": "Water Tile",
+    "kind": "tile",
+    "scene": "res://scenes/effects/water_tile.tscn",
+    "thumb": "water_tile.webp",
+    "thumb_frames": 75,
+    "thumb_columns": 6,
+    "thumb_fps": 24,
+    "capture_fps": 24
+  },
+  {
+    "id": "lightning_tile",
+    "title": "Lightning Tile",
+    "kind": "tile",
+    "scene": "res://scenes/effects/lightning_tile.tscn",
+    "thumb": "lightning_tile.webp",
+    "thumb_frames": 75,
+    "thumb_columns": 6,
+    "thumb_fps": 24,
+    "capture_fps": 24
+  },
+  {
+    "id": "snow_tile",
+    "title": "Snow Tile",
+    "kind": "tile",
+    "scene": "res://scenes/effects/snow_tile.tscn",
+    "thumb": "snow_tile.webp",
+    "thumb_frames": 75,
+    "thumb_columns": 6,
+    "thumb_fps": 24,
+    "capture_fps": 24
   }
 ]

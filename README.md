@@ -36,6 +36,36 @@ PCK file is huge, so it might take a while to load.
 </tr>
 </table>
 
+## Tile Gallery
+
+<table>
+<tr>
+<td><strong>Fire Tile</strong></td>
+<td align="right">2026/09/23</td>
+<td><strong>Snow Tile</strong></td>
+<td align="right">2026/09/24</td>
+</tr>
+<tr>
+<td colspan="2" align="center"><img src="docs/gifs/fire_tile.gif" alt="Fire Tile with animated flames and glowing embers"><br>Procedural flames, flowing ribbons, and glowing embers.<br>Drag the tile or click empty space to see wind react to movement.</td>
+<td colspan="2" align="center"><img src="docs/gifs/snow_tile.gif" alt="Snow Tile with powder snow and softly drifting cold mist"><br>Sunlit snow crystals, swirling flakes, and softly drifting cold mist.<br>Movement disturbs the mist, which curls and gently settles.</td>
+</tr>
+<tr>
+<td><strong>Water Tile</strong></td>
+<td align="right">2026/09/23</td>
+<td><strong>Lightning Tile</strong></td>
+<td align="right">2026/09/24</td>
+</tr>
+<tr>
+<td colspan="2" align="center"><img src="docs/gifs/water_tile.gif" alt="Water Tile with flowing highlights, rising bubbles, and ripples"><br>Flowing water highlights, floating bubbles, and gentle ripples.<br>Drag to slosh the water, shed droplets, and see it bounce back.</td>
+<td colspan="2" align="center"><img src="docs/gifs/lightning_tile.gif" alt="Lightning Tile with violet storm clouds and branching electric arcs"><br>Violet storm clouds and writhing, branching electric arcs.<br>Discharges travel along each bolt; movement leaves short electric trails.</td>
+</tr>
+</table>
+
+## Working with AI agents
+
+Read [AGENTS.md](AGENTS.md) for project context, constraints, local commands, and
+gallery maintenance rules. The original Cursor rules remain in `.cursor/rules/`.
+
 ## License
 
 **Code, shaders, and VFX** in this repository may be used freely, including in personal and commercial projects. No attribution is required.
