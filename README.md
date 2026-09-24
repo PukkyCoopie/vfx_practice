@@ -61,11 +61,6 @@ PCK file is huge, so it might take a while to load.
 </tr>
 </table>
 
-## Working with AI agents
-
-Read [AGENTS.md](AGENTS.md) for project context, constraints, local commands, and
-gallery maintenance rules. The original Cursor rules remain in `.cursor/rules/`.
-
 ## License
 
 **Code, shaders, and VFX** in this repository may be used freely, including in personal and commercial projects. No attribution is required.
